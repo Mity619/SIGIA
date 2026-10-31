@@ -1,12 +1,5 @@
 SIGIA · Sistema de Gestión de Ingresos y Ahorros
 
-https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white
-https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white
-https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white
-https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white
-https://img.shields.io/badge/Recharts-2-22B5BF?logo=chartdotjs&logoColor=white
-https://img.shields.io/badge/license-MIT-blue
-
 Aplicación web de finanzas personales para registrar gastos e ingresos, clasificarlos por frecuencia y grupos, gestionar cuentas y visualizar el impacto financiero con gráficas interactivas.
 
     Estado: 🚧 En desarrollo · Versión: 2.0 · Última actualización: 29/10/2026
