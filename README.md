@@ -2,7 +2,7 @@ SIGIA · Sistema de Gestión de Ingresos y Ahorros
 
 Aplicación web de finanzas personales para registrar gastos e ingresos, clasificarlos por frecuencia y grupos, gestionar cuentas y visualizar el impacto financiero con gráficas interactivas.
 
-    Estado: 🚧 En desarrollo · Versión: 2.0 · Última actualización: 29/10/2026
+    Estado: 🚧 En desarrollo · Versión: 2.0 · Última actualización: 30/10/2026
 
 ✨ Características
 
