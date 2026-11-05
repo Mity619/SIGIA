@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import { Home, SignUp, Login, Dashboard } from "@/pages";
+import { Home, SignUp, Login, Dashboard, CualquierCosa } from "@/pages";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { PageLoader } from "@/shared/components/ui/sections/PageLoader";
 import { GuestOnlyRoute } from "./GuestOnlyRoute";
@@ -20,6 +20,7 @@ export const AppRouter = () => {
       {/* Rutas Públicas */}
       <Route path="/" element={<Home />} />
       <Route path="/signup" element={<SignUp />} />
+      <Route path="/cualquier-cosa" element={<CualquierCosa />} />
 
       {/* Login solo para usuarios que no tienen una sesión activa */}
       <Route element={<GuestOnlyRoute />}>
