@@ -118,7 +118,7 @@ Principios de arquitectura
 | Colección | Descripción |
 |---|---|
 | `users/{uid}` | Perfil del usuario |
-| `users/{uid}/accounts` | Cuentas financieras |
+| `accounts/{accountId}` | Cuentas financieras (`user_id`, `name`, `default`) |
 | `users/{uid}/items` | Conceptos de gasto e ingreso |
 | `users/{uid}/groups` | Grupos personalizados |
 | `users/{uid}/entries` | Movimientos |
@@ -128,7 +128,7 @@ Los items pueden guardar los identificadores de sus grupos en un campo `groupIds
 
 Reglas clave:
 
-    Cloud Firestore Security Rules restringen el acceso a las rutas del usuario autenticado (uid).
+    Cloud Firestore Security Rules restringen el perfil por uid y las cuentas por user_id.
 
     Las reglas y la validación de la aplicación verifican datos como monto > 0 y frecuencias válidas.
 
