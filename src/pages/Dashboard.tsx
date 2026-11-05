@@ -8,8 +8,8 @@ export const Dashboard = () => {
   return (
     <>
       <Header
-        title={`Hola chat`}
-        paragraph="Descubre tus finanzas como nunca antes"
+        title={`Hola ${user?.username || "Usuario"}`}
+        paragraph="Bienvenido a tu panel de control. Aquí puedes gestionar tus finanzas personales, ver tus gastos y ahorros, y mucho más."
       />
     </>
   );
