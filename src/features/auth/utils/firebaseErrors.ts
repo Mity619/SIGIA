@@ -25,7 +25,7 @@ export const getAuthErrorMessage = (error: unknown): string => {
         return "Demasiados intentos. Intenta más tarde.";
 
       case "permission-denied":
-        return "No se pudo acceder al perfil. Verifica las reglas de seguridad de Firestore.";
+        return "No se pudo acceder a los datos. Verifica las reglas de seguridad de Firestore.";
 
       case "unavailable":
         return "Firestore no está disponible. Verifica tu conexión e intenta nuevamente.";
@@ -37,6 +37,27 @@ export const getAuthErrorMessage = (error: unknown): string => {
 
   if (error instanceof Error && error.message === "AUTH_USER_EMAIL_MISSING") {
     return "La cuenta autenticada no tiene un correo asociado.";
+  }
+
+  if (error instanceof Error) {
+    switch (error.message) {
+      case "AUTH_USER_PROFILE_MISSING":
+        return "No se encontró el perfil del usuario para crear su cuenta.";
+      case "AUTH_ROLLBACK_FAILED":
+        return "No se pudo revertir el registro. Contacta al equipo de soporte.";
+      case "AUTH_SESSION_CLEANUP_FAILED":
+        return "No se pudo sincronizar el perfil ni cerrar la sesión. Intenta nuevamente.";
+      case "ACCOUNT_DEFAULT_CANNOT_DELETE":
+        return "No se puede eliminar la cuenta predeterminada.";
+      case "ACCOUNT_NOT_FOUND":
+        return "La cuenta que intentas eliminar no existe.";
+      case "ACCOUNT_ACCESS_DENIED":
+        return "No tienes permiso para modificar esta cuenta.";
+      case "ACCOUNT_DEFAULT_ID_CONFLICT":
+        return "No se pudo crear la cuenta predeterminada porque el identificador reservado ya está ocupado.";
+      default:
+        break;
+    }
   }
 
   return "Error inesperado";
