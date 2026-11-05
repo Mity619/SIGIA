@@ -3,16 +3,19 @@ import { AuthContextProvider } from "./features/auth/contexts/AuthContext";
 import { AppRouter } from "@/app/router/AppRouter";
 import { DashboardContextProvider } from "./features/dashboard/contexts/DashboardContext";
 import { NotificationProvider } from "./app/providers/NotificationProvider";
+import { AccountContextProvider } from "./features/accounts/contexts/AccountContext";
 
 function App() {
   return (
     <BrowserRouter>
       <NotificationProvider>
-        <AuthContextProvider>
-          <DashboardContextProvider>
-            <AppRouter />
-          </DashboardContextProvider>
-        </AuthContextProvider>
+        <AccountContextProvider>
+          <AuthContextProvider>
+            <DashboardContextProvider>
+              <AppRouter />
+            </DashboardContextProvider>
+          </AuthContextProvider>
+        </AccountContextProvider>
       </NotificationProvider>
     </BrowserRouter>
   );
