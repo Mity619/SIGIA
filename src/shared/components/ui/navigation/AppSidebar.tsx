@@ -36,11 +36,13 @@ export function AppSidebar() {
   return (
     <Sidebar className="bg-white border-r border-gray-200 shadow-sm">
       <SidebarHeader className="flex-row items-center gap-2 bg-white border-b border-gray-100 px-4 py-4">
-        <i
-          className="ri-money-dollar-circle-fill text-5xl text-[#6B2D8F]"
-          aria-hidden="true"
-        />
-        <a className="text-5xl font-bold text-[#6B2D8F]">SIGIA</a>
+        <Link to="/" className="flex items-center gap-2">
+          <i
+            className="ri-money-dollar-circle-fill text-5xl text-[#6B2D8F]"
+            aria-hidden="true"
+          />
+          <a className="text-5xl font-bold text-[#6B2D8F]">SIGIA</a>
+        </Link>
       </SidebarHeader>
       <SidebarContent className="bg-white">
         <SidebarGroup>
