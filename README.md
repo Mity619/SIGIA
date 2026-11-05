@@ -1,10 +1,10 @@
 SIGIA · Sistema de Gestión de Ingresos y Ahorros
 
-Aplicación web de finanzas personales para registrar gastos e ingresos, clasificarlos por frecuencia y grupos, gestionar cuentas y visualizar el impacto financiero con gráficas interactivas.
+Proyecto de aplicación web de finanzas personales. La implementación actual incluye autenticación con Firebase y una estructura inicial para el dashboard; las funcionalidades financieras siguen en desarrollo.
 
     Estado: 🚧 En desarrollo · Versión: 2.0 · Última actualización: 30/10/2026
 
-✨ Características
+🎯 Funcionalidades previstas
 
     🔐 Autenticación con correo y contraseña, rutas privadas protegidas.
 
@@ -14,7 +14,7 @@ Aplicación web de finanzas personales para registrar gastos e ingresos, clasifi
 
     🏷️ Clasificación por frecuencia (eventual, diario, semanal, mensual, anual) y grupos personalizados con íconos.
 
-    📊 Dashboard con Recharts: gastos vs. ingresos, distribución por etiqueta y evolución del balance.
+    📊 Dashboard y visualización de finanzas (en desarrollo; aún sin librería de gráficas).
 
     🏦 Cuentas (Bolsillo por defecto, banco, ahorros) con historial y variación de saldo.
 
@@ -26,113 +26,115 @@ Aplicación web de finanzas personales para registrar gastos e ingresos, clasifi
 
     🌐 Interfaz 100 % en español con skeletons de carga y errores claros.
 
-🛠 Stack
-Capa	Tecnología
-Frontend	React 18 · Vite · TypeScript
-Rutas	React Router v6
-Datos	TanStack Query · Supabase (PostgreSQL + Auth + RLS)
-Formularios	React Hook Form · Zod
-UI	MUI + tema propio (en revisión)
-Gráficas	Recharts
-Notificaciones	notistack
-Fechas	date-fns (locale es)
-Pruebas	Vitest · Testing Library · Playwright
-Calidad	ESLint · Prettier
-CI/CD	GitHub Actions · Vercel
+🛠 Stack actual
+
+| Capa | Tecnología |
+|---|---|
+| Frontend | React 19 · TypeScript 7 · Vite 8 |
+| Rutas | React Router 7 |
+| Autenticación y datos | Firebase Authentication · Cloud Firestore |
+| Archivos | Firebase Storage (fotos de perfil) |
+| Interfaz | Tailwind CSS 4 · shadcn/ui · Radix UI |
+| Notificaciones | notistack |
+| Iconos y tipografía | Remix Icon · Poppins |
+| Utilidades de estilos | clsx · tailwind-merge |
+| Calidad | Oxlint · TypeScript (`tsc --noEmit`) |
+
+Las pruebas automatizadas, las gráficas y las librerías de formularios todavía no están configuradas.
+
 🚀 Empezar
 Requisitos
 
-    Node.js ≥ 18
+    Node.js 20.19+ o 22.12+
 
-    Cuenta de Supabase
+    Proyecto de Firebase con Authentication, Cloud Firestore y Cloud Storage habilitados
 
 Instalación
 bash
 
 # 1. Clonar el repositorio
+
 git clone <repo-url>
 cd sigia
 
 # 2. Instalar dependencias
+
 npm install
 
-# 3. Configurar variables de entorno
-cp .env.example .env
-# Edita .env y completa VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY
+# 3. Crear el archivo local de variables de entorno
+cp .env.template .env
+# Completa VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN,
+# VITE_FIREBASE_PROJECT_ID, VITE_FIREBASE_STORAGE_BUCKET,
+# VITE_FIREBASE_MESSAGING_SENDER_ID y VITE_FIREBASE_APP_ID
 
 # 4. Levantar el entorno de desarrollo
+
 npm run dev
 
 La app estará disponible en http://localhost:5173.
 Scripts disponibles
 bash
 
-npm run dev          # Servidor de desarrollo
-npm run build        # Build de producción
-npm run preview      # Previsualizar el build
-npm run lint         # ESLint
-npm run test         # Pruebas unitarias y de componentes
-npm run test:e2e     # Pruebas E2E con Playwright
+npm run dev       # Servidor de desarrollo
+npm run typecheck # Verifica los tipos de TypeScript
+npm run build     # Verifica tipos y genera el build de producción
+npm run lint      # Ejecuta Oxlint
+npm run preview   # Previsualiza el build
 
 📁 Estructura del proyecto
 text
 
 src/
-├── app/          # providers, router, guards, tema
-├── domain/       # lógica financiera pura (porcentajes, proyecciones, ahorro)
-├── services/     # acceso a Supabase (auth, items, entries, accounts…)
-├── shared/       # UI compartida, hooks, utilidades, manejador de errores
+├── app/          # router y providers de la aplicación
 ├── features/
-│   ├── auth/
-│   ├── home-checklist/
-│   ├── items/        # gastos e ingresos
-│   ├── accounts/
-│   ├── savings/
-│   ├── dashboard/
-│   └── tags/         # etiquetas, grupos e íconos
-└── assets/icons/     # íconos verdes, neutros y rojos
+│   ├── auth/     # autenticación, estado y formularios
+│   └── dashboard/
+├── firebase/     # configuración y hooks de acceso a Firebase
+├── lib/          # utilidades generales (composición de clases CSS)
+├── pages/        # páginas enrutables
+├── shared/       # componentes compartidos y hooks
+└── styles/       # estilos globales y tema Tailwind
 
 Principios de arquitectura
 
     Feature-based: cada módulo agrupa componentes, hooks y servicios.
 
-    Capa de servicios aislada: ningún componente llama a Supabase directamente.
+    Acceso a Firebase centralizado en firebase/ y en las funciones de cada feature.
 
-    Lógica financiera pura en domain/, testeable sin React.
+    Componentes compartidos en shared/ y páginas conectadas mediante app/router.
 
-    Un solo manejador de errores que traduce fallas técnicas a español.
 
-    Un solo sistema de diseño: sin colores ni espaciados ad-hoc.
+🗺 Rutas implementadas
 
-🗺 Rutas
-Ruta	Acceso	Descripción
-/login, /registro	Pública	Autenticación
-/	Privada	Home con checklist y resumen
-/gastos	Privada	Listado con filtros
-/gastos/:id	Privada	Detalle e historial
-/ingresos	Privada	Listado de ingresos
-/cuentas	Privada	Estado de cuentas
-/ahorro	Privada	Ahorro y metas
-*	Pública	Página 404
-🗄 Modelo de datos (resumen)
-Tabla	Descripción
-users	Perfil del usuario (nombre, moneda)
-accounts	Cuentas financieras (Bolsillo por defecto)
-items	Conceptos de gasto/ingreso con frecuencia e ícono
-groups	Grupos personalizados
-item_groups	Relación N:N entre items y grupos
-entries	Movimientos (monto, fecha, cuenta, item)
-savings_goals	Metas de ahorro
+| Ruta | Acceso | Descripción |
+|---|---|---|
+| `/` | Pública | Página de inicio |
+| `/signup` | Pública | Registro |
+| `/login` | Pública | Inicio de sesión |
+| `/dashboard` | Privada | Panel principal |
+
+🗄 Modelo de datos previsto
+
+| Colección | Descripción |
+|---|---|
+| `users/{uid}` | Perfil del usuario |
+| `users/{uid}/accounts` | Cuentas financieras |
+| `users/{uid}/items` | Conceptos de gasto e ingreso |
+| `users/{uid}/groups` | Grupos personalizados |
+| `users/{uid}/entries` | Movimientos |
+| `users/{uid}/savings_goals` | Metas de ahorro |
+
+Los items pueden guardar los identificadores de sus grupos en un campo `groupIds`, evitando una tabla de unión.
 
 Reglas clave:
 
-    RLS activo en todas las tablas (user_id = auth.uid()).
+    Cloud Firestore Security Rules restringen el acceso a las rutas del usuario autenticado (uid).
 
-    Restricciones CHECK: monto > 0, frecuencia válida.
+    Las reglas y la validación de la aplicación verifican datos como monto > 0 y frecuencias válidas.
 
-    Índices en entries(user_id, fecha) e entries(item_id, fecha).
+    Configurar índices compuestos de Firestore para las consultas de movimientos (por fecha, item y cuenta) según se necesiten.
 
-    Vistas SQL para agregaciones del dashboard y la página de ahorro.
+    Implementar las agregaciones del dashboard con consultas o agregaciones de Firestore, según los requisitos de lectura y escritura.
 
 🧮 Fórmulas de negocio
 
@@ -145,11 +147,8 @@ Reglas clave:
     Variación de cuenta = (saldo actual − saldo anterior) ÷ saldo anterior × 100
 
 🧪 Calidad
-Nivel	Herramienta	Meta
-Unitarias	Vitest	90 % cobertura en domain/
-Componentes	Testing Library	Casos éxito y error
-E2E	Playwright	8 flujos críticos
-RLS	Pruebas de aislamiento	0 fugas entre usuarios
+
+Actualmente se ejecutan Oxlint y el chequeo de tipos de TypeScript durante el build. Las pruebas unitarias, de componentes, E2E y de reglas de Firebase están pendientes de configuración.
 
 Definition of Done: PR revisado, tests en verde, sin errores de lint, textos en español, estados carga/vacío/error implementados y desplegado en previsualización.
 📅 Roadmap
@@ -159,7 +158,7 @@ Definition of Done: PR revisado, tests en verde, sin errores de lint, textos en 
     Sprint 0 · Preparación (repo, CI, modelo de datos)
     □
 
-    Sprint 1 · Autenticación, rutas privadas, layout, RLS
+    Sprint 1 · Autenticación, rutas privadas, layout, reglas de seguridad de Firestore
     □
 
     Sprint 2 · CRUD de items y movimientos, formulario inteligente
@@ -199,4 +198,5 @@ Ramas:
 📄 Licencia
 
 MIT © 2026 · Equipo SIGIA
+
 <div align="center"> <sub>Hecho con ☕ y React · <a href="#sigia--sistema-de-gestión-de-ingresos-y-ahorros">Volver arriba</a></sub> </div>
