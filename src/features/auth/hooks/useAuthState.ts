@@ -7,27 +7,33 @@ import { auth, db, provider } from "@/firebase/config";
 import {
   createUserWithEmailAndPassword,
   deleteUser,
+  getAdditionalUserInfo,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
   type User as FirebaseUser,
 } from "firebase/auth";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 
 // * Types & utils
 import type { User, UserDoc, UserLogin } from "../types/user.types";
 import { getAuthErrorMessage } from "../utils/firebaseErrors";
+import { useAccount } from "@/features/accounts/hooks/useAccount";
 
 const getOrCreateUserProfile = async (
   firebaseUser: FirebaseUser,
+  ensureDefaultAccount: (
+    userId: string,
+    newUserProfile?: UserDoc,
+  ) => Promise<UserDoc>,
   fallbackUsername?: string,
 ): Promise<UserDoc> => {
   const userRef = doc(db, "users", firebaseUser.uid);
   const userSnapshot = await getDoc(userRef);
 
   if (userSnapshot.exists()) {
-    return userSnapshot.data() as UserDoc;
+    return ensureDefaultAccount(firebaseUser.uid);
   }
 
   if (!firebaseUser.email) {
@@ -44,15 +50,12 @@ const getOrCreateUserProfile = async (
     photoURL: firebaseUser.photoURL || "",
   };
 
-  await setDoc(userRef, {
-    ...profile,
-    createdAt: serverTimestamp(),
-  });
-
-  return profile;
+  return ensureDefaultAccount(firebaseUser.uid, profile);
 };
 
 export default function useAuthState() {
+  const { ensureDefaultAccount } = useAccount();
+
   //* States
   const [user, setUser] = useState<UserDoc | null>(null);
   const [loading, setLoading] = useState(true);
@@ -78,7 +81,10 @@ export default function useAuthState() {
       }
 
       try {
-        const userProfile = await getOrCreateUserProfile(firebaseUser);
+        const userProfile = await getOrCreateUserProfile(
+          firebaseUser,
+          ensureDefaultAccount,
+        );
         setUser(userProfile);
       } catch (error) {
         setUser(null);
@@ -89,7 +95,7 @@ export default function useAuthState() {
     });
 
     return () => unsubscribe();
-  }, [enqueueSnackbar]);
+  }, [enqueueSnackbar, ensureDefaultAccount]);
 
   //* Functions
   const registerWithEmailAndPassword = async ({
@@ -108,11 +114,18 @@ export default function useAuthState() {
       );
 
       try {
-        const profile = await getOrCreateUserProfile(firebaseUser, username);
+        const profile = await getOrCreateUserProfile(
+          firebaseUser,
+          ensureDefaultAccount,
+          username,
+        );
         setUser(profile);
       } catch (err) {
-        // Sin perfil no se deja la cuenta creada
-        await deleteUser(firebaseUser);
+        try {
+          await deleteUser(firebaseUser);
+        } catch {
+          throw new Error("AUTH_ROLLBACK_FAILED");
+        }
         throw err;
       }
 
@@ -139,7 +152,10 @@ export default function useAuthState() {
       );
       signedInUser = firebaseUser;
 
-      const profile = await getOrCreateUserProfile(firebaseUser);
+      const profile = await getOrCreateUserProfile(
+        firebaseUser,
+        ensureDefaultAccount,
+      );
       setUser(profile);
       enqueueSnackbar("Sesión iniciada correctamente.", {
         variant: "success",
@@ -150,7 +166,9 @@ export default function useAuthState() {
         try {
           await signOut(auth);
         } catch {
-          return "No se pudo sincronizar el perfil ni cerrar la sesión. Intenta nuevamente.";
+          return getAuthErrorMessage(
+            new Error("AUTH_SESSION_CLEANUP_FAILED"),
+          );
         }
       }
       return getAuthErrorMessage(err);
@@ -162,21 +180,36 @@ export default function useAuthState() {
   const authWithGoogle = async (): Promise<string | null> => {
     isSyncingRef.current = true;
     let signedInUser: FirebaseUser | null = null;
+    let isNewUser = false;
 
     try {
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
       signedInUser = firebaseUser;
-      const profile = await getOrCreateUserProfile(firebaseUser);
+      isNewUser = getAdditionalUserInfo(result)?.isNewUser ?? false;
+      const profile = await getOrCreateUserProfile(
+        firebaseUser,
+        ensureDefaultAccount,
+      );
       setUser(profile);
       enqueueSnackbar("Sesión iniciada con Google.", { variant: "success" });
       return null;
     } catch (error) {
       if (signedInUser) {
         try {
-          await signOut(auth);
+          if (isNewUser) {
+            await deleteUser(signedInUser);
+          } else {
+            await signOut(auth);
+          }
         } catch {
-          return "No se pudo sincronizar el perfil ni cerrar la sesión. Intenta nuevamente.";
+          return getAuthErrorMessage(
+            new Error(
+              isNewUser
+                ? "AUTH_ROLLBACK_FAILED"
+                : "AUTH_SESSION_CLEANUP_FAILED",
+            ),
+          );
         }
       }
       return getAuthErrorMessage(error);
