@@ -28,6 +28,11 @@ const items: IItem[] = [
     url: "/dashboard",
     icon: "ri-cash-line",
   },
+  {
+    title: "Gastos",
+    url: "/expenses",
+    icon: "ri-price-tag-3-fill",
+  },
 ];
 
 export function AppSidebar() {

@@ -6,6 +6,7 @@ import {
   Dashboard,
   CualquierCosa,
   PageNotFound,
+  Expenses,
 } from "@/pages";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { PageLoader } from "@/shared/components/ui/sections/PageLoader";
@@ -40,6 +41,7 @@ export const AppRouter = () => {
         {/* Layout común para todas las rutas privadas */}
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/expenses" element={<Expenses />} />
         </Route>
       </Route>
     </Routes>
