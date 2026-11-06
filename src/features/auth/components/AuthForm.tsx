@@ -1,4 +1,4 @@
-//import Icon from "@/assets/logos/icon.png";
+import { Logo } from "@/shared/components/brand/Logo";
 import { Button } from "@/shared/components/shadcn/button";
 import {
   Field,
@@ -13,6 +13,11 @@ interface Props {
   isSignup?: boolean;
 }
 
+const inputClass =
+  "h-11 rounded-xl border-gray-200 bg-gray-50/60 px-4 transition focus-visible:border-[#DA0081] focus-visible:bg-white focus-visible:ring-[#da008133]";
+
+const labelClass = "text-sm font-medium text-[#200020]";
+
 export const AuthForm = ({ isSignup = false }: Props) => {
   const {
     email,
@@ -26,27 +31,31 @@ export const AuthForm = ({ isSignup = false }: Props) => {
   } = useAuthForm(isSignup);
 
   return (
-    <main className="flex items-center justify-center w-full min-h-screen px-4">
+    <main className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-[#da00830d] via-white to-[#e366a714] px-4 py-10">
       <form
-        className="flex w-full flex-col max-w-lg border border-gray-200 rounded px-10 py-8"
+        className="flex w-full max-w-md flex-col rounded-3xl border border-gray-100 bg-white px-8 py-10 shadow-xl shadow-[#2000200d] sm:px-10"
         onSubmit={handleSubmit}
       >
-        {/* <img src={Icon} alt="Icon" className="size-12 mb-4" /> */}
+        <div className="text-center">
+          <div className="mb-2 flex items-center gap-3 justify-center">
+            <Logo size="lg" onlyLogo={true} />
+            <h2 className="text-2xl font-semibold tracking-tight text-[#200020]">
+              {isSignup ? "Registrarse" : "Iniciar sesión"}
+            </h2>
+          </div>
+          <p className="mt-2 py-2 text-sm text-[#200020]/60">
+            {isSignup
+              ? "Crea una cuenta para disfrutar de SIGIA"
+              : "Inicia sesión para continuar en SIGIA"}
+          </p>
+        </div>
 
-        <h2 className="text-2xl font-medium text-foreground">
-          {isSignup ? "Registrarse" : "Iniciar sesión"}
-        </h2>
-
-        <p className="mt-2 text-sm text-foreground/70">
-          {isSignup
-            ? "Crea una cuenta para disfrutar de SIGIA"
-            : "Inicia sesión para continuar en SIGIA"}
-        </p>
-
-        <div className="flex flex-col gap-4 my-4">
-          <FieldGroup>
+        <div className="my-8">
+          <FieldGroup className="gap-5">
             <Field>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <FieldLabel htmlFor="email" className={labelClass}>
+                Correo electrónico
+              </FieldLabel>
               <Input
                 type="email"
                 id="email"
@@ -54,22 +63,28 @@ export const AuthForm = ({ isSignup = false }: Props) => {
                 required
                 value={email}
                 onChange={handleEmailChange}
+                className={inputClass}
               />
             </Field>
             {isSignup && (
               <Field>
-                <FieldLabel htmlFor="username">Nombre de Usuario</FieldLabel>
+                <FieldLabel htmlFor="username" className={labelClass}>
+                  Nombre de usuario
+                </FieldLabel>
                 <Input
                   id="username"
                   placeholder="ejemplo"
                   required
                   value={username}
                   onChange={handleUsernameChange}
+                  className={inputClass}
                 />
               </Field>
             )}
             <Field>
-              <FieldLabel htmlFor="password">Contraseña</FieldLabel>
+              <FieldLabel htmlFor="password" className={labelClass}>
+                Contraseña
+              </FieldLabel>
               <Input
                 type="password"
                 id="password"
@@ -77,22 +92,34 @@ export const AuthForm = ({ isSignup = false }: Props) => {
                 required
                 value={password}
                 onChange={handlePasswordChange}
+                className={inputClass}
               />
             </Field>
           </FieldGroup>
         </div>
 
         <div className="flex flex-col gap-4">
-          <Button size="lg" type="submit">
+          <Button
+            size="lg"
+            type="submit"
+            className="h-11 rounded-xl bg-[#DA0081] font-semibold text-white shadow-md shadow-[#da008140] transition hover:bg-[#E366A7]"
+          >
             {isSignup ? "Registrarse" : "Iniciar sesión"}
           </Button>
+
+          <div className="flex items-center gap-3 text-xs text-gray-400">
+            <span className="h-px flex-1 bg-gray-200" />o
+            <span className="h-px flex-1 bg-gray-200" />
+          </div>
+
           <Button
+            type="button"
             variant="outline"
             size="lg"
-            className="w-full flex items-center justify-center gap-2"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border-gray-200 font-medium text-[#200020] hover:bg-gray-50"
             onClick={handleGoogleAuth}
           >
-            <svg className="h-5 w-5" viewBox="0 0 48 48">
+            <svg className="h-5 w-5" viewBox="0 0 48 48" aria-hidden="true">
               <path
                 fill="#EA4335"
                 d="M24 9.5c3.54 0 6.7 1.22 9.2 3.6l6.9-6.9C35.9 2.1 30.4 0 24 0 14.6 0 6.4 5.4 2.6 13.2l8 6.2C12.5 13.4 17.8 9.5 24 9.5z"
@@ -114,9 +141,13 @@ export const AuthForm = ({ isSignup = false }: Props) => {
           </Button>
         </div>
 
-        <p className="text-center text-sm pt-4">
+        <p className="pt-6 text-center text-sm text-[#200020]/60">
           {isSignup ? "¿Ya tienes una cuenta?" : "¿No tienes una cuenta?"}{" "}
-          <Button variant="link" asChild>
+          <Button
+            variant="link"
+            asChild
+            className="h-auto p-0 font-semibold text-[#DA0081]"
+          >
             <Link to={isSignup ? "/login" : "/signup"}>
               {isSignup ? "Iniciar sesión" : "Registrarse"}
             </Link>

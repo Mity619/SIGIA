@@ -1,4 +1,5 @@
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { Logo } from "@/shared/components/brand/Logo";
 import {
   Sidebar,
   SidebarContent,
@@ -36,17 +37,9 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r border-gray-100 bg-white">
-      <SidebarHeader className="bg-white px-5 pt-6 pb-4">
-        <Link to="/" className="flex items-center gap-3">
-          <span className="flex size-10 items-center justify-center rounded-2xl bg-[#DA0081] shadow-md shadow-[#da008140]">
-            <i
-              className="ri-money-dollar-circle-fill text-2xl text-white"
-              aria-hidden="true"
-            />
-          </span>
-          <span className="text-2xl font-bold tracking-tight text-[#200020]">
-            SIGIA
-          </span>
+      <SidebarHeader className="bg-white px-5 pt-6 pb-4 ">
+        <Link to="/" aria-label="Ir al inicio">
+          <Logo size="md" onlyLogo={false} />
         </Link>
       </SidebarHeader>
 
