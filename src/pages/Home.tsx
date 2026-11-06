@@ -32,7 +32,7 @@ export const Home = () => {
               asChild
               className="mt-6 bg-[#DA0081] text-white hover:bg-[#5a2470]"
             >
-              <Link to="/signup">Ingresar</Link>
+              <Link to="/login">Ingresar</Link>
             </Button>
           </div>
 
