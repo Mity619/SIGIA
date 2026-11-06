@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/shared/components/shadcn/sidebar";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "../../shadcn/button";
 import { ProfilePhoto } from "../user/ProfilePhoto";
 
@@ -32,53 +32,76 @@ const items: IItem[] = [
 export function AppSidebar() {
   //* Context
   const { user, logout } = useAuth();
+  const { pathname } = useLocation();
 
   return (
-    <Sidebar className="bg-white border-r border-gray-200 shadow-sm">
-      <SidebarHeader className="flex-row items-center gap-2 bg-white border-b border-gray-100 px-4 py-4">
-        <Link to="/" className="flex items-center gap-2">
-          <i
-            className="ri-money-dollar-circle-fill text-5xl text-[#DA0081]"
-            aria-hidden="true"
-          />
-          <a className="text-5xl font-bold text-[#200020]">SIGIA</a>
+    <Sidebar className="border-r border-gray-100 bg-white">
+      <SidebarHeader className="bg-white px-5 pt-6 pb-4">
+        <Link to="/" className="flex items-center gap-3">
+          <span className="flex size-10 items-center justify-center rounded-2xl bg-[#DA0081] shadow-md shadow-[#da008140]">
+            <i
+              className="ri-money-dollar-circle-fill text-2xl text-white"
+              aria-hidden="true"
+            />
+          </span>
+          <span className="text-2xl font-bold tracking-tight text-[#200020]">
+            SIGIA
+          </span>
         </Link>
       </SidebarHeader>
-      <SidebarContent className="bg-white">
+
+      <SidebarContent className="bg-white px-3">
         <SidebarGroup>
+          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+            Menú
+          </p>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    className="hover:bg-gray-100 rounded-md px-4 py-4 transition text-[#200020]"
-                  >
-                    <Link to={item.url}>
-                      <i className={item.icon + " text-[#DA0081]"} />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+            <SidebarMenu className="gap-1">
+              {items.map((item) => {
+                const isActive = pathname.startsWith(item.url);
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      className={`h-11 rounded-xl px-3 text-sm transition-all duration-200 ${
+                        isActive
+                          ? "bg-[#da00831f] font-semibold text-[#DA0081] hover:bg-[#da00831f] hover:text-[#DA0081]"
+                          : "text-[#200020]/70 hover:bg-gray-50 hover:text-[#200020]"
+                      }`}
+                    >
+                      <Link to={item.url}>
+                        <i
+                          className={`${item.icon} text-lg ${
+                            isActive ? "text-[#DA0081]" : "text-[#200020]/50"
+                          }`}
+                          aria-hidden="true"
+                        />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="bg-white border-t border-gray-100">
-        <div className="w-full flex items-center justify-between px-2 py-2 gap-4">
-          <div className="flex items-center gap-2 overflow-hidden">
-            <ProfilePhoto />
-            <span className="text-sm font-medium truncate">
-              {user?.username?.split(" ").slice(0, 2).join(" ") ?? "User"}
-            </span>
-          </div>
 
+      <SidebarFooter className="bg-white p-3">
+        <div className="flex items-center gap-3 rounded-2xl bg-gray-50 p-2.5">
+          <ProfilePhoto />
+          <span className="min-w-0 flex-1 truncate text-sm font-medium text-[#200020]">
+            {user?.username?.split(" ").slice(0, 2).join(" ") ?? "Usuario"}
+          </span>
           <Button
             onClick={logout}
-            className="size-10 rounded-full bg-[#da00831f] text-[#DA0081] transition hover:bg-[#E366A7]"
+            aria-label="Cerrar sesión"
+            title="Cerrar sesión"
+            className="size-9 shrink-0 rounded-xl bg-[#da00831f] text-[#DA0081] shadow-none transition-colors hover:bg-[#E366A7] hover:text-white"
           >
-            <i className="ri-logout-box-r-line text-lg"></i>
+            <i className="ri-logout-box-r-line text-lg" aria-hidden="true" />
           </Button>
         </div>
       </SidebarFooter>
