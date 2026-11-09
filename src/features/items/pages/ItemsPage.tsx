@@ -4,7 +4,13 @@ import { useGroups } from "@/features/tags/hooks/useGroups";
 import { ItemCard, ItemCardSkeleton } from "../components/ItemCard";
 import { Button } from "@/shared/components/shadcn/button";
 import { Link } from "react-router-dom";
+import { useMemo } from "react";
+import { filterItems } from "@/domain";
 import type { TransactionType } from "../types/items.types";
+import { useUserEntries } from "../hooks/useUserEntries";
+import { useItemFilters } from "../hooks/useItemFilters";
+import { ItemFilters } from "../components/ItemFilters";
+import { toDomainItem } from "../mappers";
 
 export function ItemsPage({ type }: { type: TransactionType }) {
   const { getUserId } = useAuth();
@@ -12,6 +18,15 @@ export function ItemsPage({ type }: { type: TransactionType }) {
   
   const { items, loading } = useItems(uid, type);
   const { groups } = useGroups(uid);
+  const { entries, loading: loadingEntries } = useUserEntries(uid);
+  const { filters, setFilter, clearFilters, isActive } = useItemFilters();
+
+  // HU-11: filtros en memoria (src/domain/filters.ts)
+  const visibleItems = useMemo(() => {
+    if (!isActive) return items;
+    const rows = items.map((doc) => ({ ...toDomainItem(doc), doc }));
+    return filterItems(rows, entries, filters).map((r) => r.doc);
+  }, [items, entries, filters, isActive]);
 
   const title = type === "expense" ? "Gastos" : "Ingresos";
   const route = type === "expense" ? "gastos" : "ingresos";
@@ -32,7 +47,18 @@ export function ItemsPage({ type }: { type: TransactionType }) {
         )}
       </div>
 
-      {loading ? (
+      {items.length > 0 && (
+        <ItemFilters
+          filters={filters}
+          groups={groups}
+          isActive={isActive}
+          resultCount={visibleItems.length}
+          onChange={setFilter}
+          onClear={clearFilters}
+        />
+      )}
+
+      {loading || (isActive && loadingEntries) ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => <ItemCardSkeleton key={i} />)}
         </div>
@@ -54,9 +80,17 @@ export function ItemsPage({ type }: { type: TransactionType }) {
             </Link>
           </Button>
         </div>
+      ) : visibleItems.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-4 py-16 text-center">
+          <i className="ri-search-line text-3xl text-primary" aria-hidden="true" />
+          <p className="font-medium text-foreground">No hay {title.toLowerCase()} que coincidan con estos filtros.</p>
+          <Button type="button" variant="outline" onClick={clearFilters}>
+            Limpiar filtros
+          </Button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
+          {visibleItems.map((item) => (
             <ItemCard 
               key={item.id} 
               item={item} 
