@@ -122,10 +122,12 @@ export const buildComparison = (
   base: number,
 ): Comparison => {
   const restCents = toCents(base) - toCents(itemTotal);
+  const percent = percentage(itemTotal, base);
   return {
     title,
-    percent: percentage(itemTotal, base),
-    exceeds: restCents < 0,
+    percent,
+    // Solo tiene sentido "superar" una base que existe
+    exceeds: percent !== null && restCents < 0,
     slices: [
       { name: itemLabel, value: itemTotal },
       { name: restLabel, value: fromCents(Math.max(restCents, 0)) },

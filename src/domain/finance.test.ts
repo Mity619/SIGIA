@@ -142,6 +142,8 @@ describe("buildComparison (HU-13)", () => {
   });
 
   it("sin base el porcentaje es null", () => {
-    expect(buildComparison("t", "a", "b", 10, 0).percent).toBeNull();
+    const c = buildComparison("t", "a", "b", 10, 0);
+    expect(c.percent).toBeNull();
+    expect(c.exceeds).toBe(false);
   });
 });

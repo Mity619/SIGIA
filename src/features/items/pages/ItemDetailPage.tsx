@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
@@ -19,6 +19,16 @@ import { toDomainItem } from "../mappers";
 import { EntryHistory, EntryHistorySkeleton } from "../components/EntryHistory";
 import { ItemStats, ItemStatsSkeleton } from "../components/ItemStats";
 import { FrequencyBadge } from "../components/FrequencyBadge";
+
+// Recharts se carga solo cuando se abre un detalle (no penaliza la carga inicial)
+const ItemComparisonChart = lazy(() => import("../components/ItemComparisonChart"));
+
+const ChartSkeleton = () => (
+  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <Skeleton className="h-72 rounded-2xl" />
+    <Skeleton className="h-72 rounded-2xl" />
+  </div>
+);
 
 // HU-12: detalle de un gasto/ingreso con indicadores e historial ordenable.
 export function ItemDetailPage() {
@@ -87,6 +97,7 @@ export function ItemDetailPage() {
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-9 w-64" />
         <ItemStatsSkeleton />
+        <ChartSkeleton />
         <EntryHistorySkeleton />
       </div>
     );
@@ -127,6 +138,15 @@ export function ItemDetailPage() {
           savingsIfStopped={indicators.savings}
         />
       )}
+
+      {item.type === "expense" &&
+        (loadingEntries || !indicators ? (
+          <ChartSkeleton />
+        ) : (
+          <Suspense fallback={<ChartSkeleton />}>
+            <ItemComparisonChart itemName={item.name} stats={indicators.stats} />
+          </Suspense>
+        ))}
 
       {loadingEntries ? (
         <EntryHistorySkeleton />

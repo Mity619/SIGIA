@@ -44,7 +44,7 @@ export function ItemStats({ type, stats, annualProjection, savingsIfStopped }: P
       label: "Ahorro si no lo repites",
       value: formatCurrency(savingsIfStopped),
       hint: "Lo que dejarías de gastar en un año",
-      icon: "ri-piggy-bank-line",
+      icon: "ri-hand-coin-line",
     });
   }
 

@@ -26,7 +26,7 @@ export function ItemFilters({ filters, groups, isActive, resultCount, onChange, 
       aria-label="Filtros"
       className="mb-6 flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm"
     >
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <label className="flex flex-col gap-1 text-sm">
           <span className="font-medium text-foreground">Nombre</span>
           <Input
