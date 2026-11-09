@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useEntriesByItem } from "../hooks/useEntriesByItem";
-import { useEditEntry } from "../hooks/useEditEntry";
+import { useDeleteEntry } from "../hooks/useDeleteEntry";
 import { EntryHistory } from "../components/EntryHistory";
 import { ConfirmDialog } from "@/shared/components/ui/ConfirmDialog";
 
@@ -12,14 +12,16 @@ export function ItemDetailPage() {
   const uid = getUserId();
   
   const { entries, loading } = useEntriesByItem(uid!, itemId!);
-  const { remove } = useEditEntry(uid!);
+  const { remove } = useDeleteEntry(uid!);
   
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
 
   const handleDelete = async () => {
     if (!entryToDelete) return;
-    const success = await remove(entryToDelete);
+    const entry = entries.find((e) => e.id === entryToDelete);
+    if (!entry) return;
+    const success = await remove(entry, entries);
     if (success) {
       setIsConfirmOpen(false);
       setEntryToDelete(null);
