@@ -1,0 +1,30 @@
+// Formato único de dinero, fechas y porcentajes para toda la app (es-CO).
+
+const currency = new Intl.NumberFormat("es-CO", {
+  style: "currency",
+  currency: "COP",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
+
+const longDate = new Intl.DateTimeFormat("es-CO", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
+const shortDate = new Intl.DateTimeFormat("es-CO", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+
+const percent = new Intl.NumberFormat("es-CO", { maximumFractionDigits: 2 });
+
+export const formatCurrency = (amount: number): string => currency.format(amount);
+
+export const formatDate = (date: Date, style: "long" | "short" = "long"): string =>
+  (style === "long" ? longDate : shortDate).format(date);
+
+/** Recibe un valor ya en escala 0–100 (p. ej. 40 → "40 %"). */
+export const formatPercent = (value: number): string => `${percent.format(value)} %`;

@@ -1,10 +1,9 @@
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useItems } from "../hooks/useItems";
 import { useGroups } from "@/features/tags/hooks/useGroups";
-import { ItemCard } from "../components/ItemCard";
+import { ItemCard, ItemCardSkeleton } from "../components/ItemCard";
 import { Button } from "@/shared/components/shadcn/button";
 import { Link } from "react-router-dom";
-import { Skeleton } from "@/shared/components/shadcn/skeleton";
 import type { TransactionType } from "../types/items.types";
 
 export function ItemsPage({ type }: { type: TransactionType }) {
@@ -35,7 +34,7 @@ export function ItemsPage({ type }: { type: TransactionType }) {
 
       {loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 w-full rounded-2xl" />)}
+          {[1, 2, 3, 4, 5, 6].map((i) => <ItemCardSkeleton key={i} />)}
         </div>
       ) : items.length === 0 ? (
         /* 🆕 ESTADO VACÍO MEJORADO */
