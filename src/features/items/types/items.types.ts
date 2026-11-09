@@ -21,6 +21,7 @@ export interface ItemDoc {
 export interface EntryDoc {
   id?: string;
   itemId: string;
+  type?: TransactionType;        // opcional: los movimientos anteriores al fix no lo tienen
   accountId: string;
   name: string;
   amount: number;
