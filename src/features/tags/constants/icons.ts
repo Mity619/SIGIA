@@ -1,0 +1,40 @@
+import type { IconTone } from '../types/tags.types';
+
+export const ICONS_BY_TONE: Record<IconTone, { key: string; label: string }[]> = {
+  green: [
+    { key: 'ri-money-dollar-circle-line', label: 'Dinero'   },
+    { key: 'ri-arrow-up-circle-line',     label: 'Ingreso'  },
+    { key: 'ri-car-line',                 label: 'Auto'     },
+    { key: 'ri-wallet-3-line',            label: 'Billetera'},
+    { key: 'ri-line-chart-line',          label: 'Inversión'},
+    { key: 'ri-piggy-bank-line',          label: 'Ahorro'   },
+    { key: 'ri-hand-coin-line',           label: 'Ganancia' },
+    { key: 'ri-leaf-line',                label: 'Natural'  },
+    { key: 'ri-shopping-bag-3-line',      label: 'Compras'  },
+    { key: 'ri-safe-2-line',              label: 'Seguro'   },
+  ],
+  neutral: [
+    { key: 'ri-home-4-line',      label: 'Casa'       },
+    { key: 'ri-lightbulb-line',   label: 'Luz'        },
+    { key: 'ri-file-list-3-line', label: 'Factura'    },
+    { key: 'ri-restaurant-line',  label: 'Comida'     },
+    { key: 'ri-bus-line',         label: 'Transporte' },
+    { key: 'ri-cup-line',         label: 'Café'       },
+    { key: 'ri-shirt-line',       label: 'Ropa'       },
+    { key: 'ri-heart-pulse-line', label: 'Salud'      },
+    { key: 'ri-book-open-line',   label: 'Educación'  },
+    { key: 'ri-smartphone-line',  label: 'Tecnología' },
+  ],
+  red: [
+    { key: 'ri-alert-line',             label: 'Alerta'      },
+    { key: 'ri-error-warning-line',     label: 'Advertencia' },
+    { key: 'ri-bug-line',               label: 'Hormiga'     },
+    { key: 'ri-fire-line',              label: 'Emergencia'  },
+    { key: 'ri-hospital-line',          label: 'Hospital'    },
+    { key: 'ri-tools-line',             label: 'Reparación'  },
+    { key: 'ri-arrow-down-circle-line', label: 'Gasto'       },
+    { key: 'ri-close-circle-line',      label: 'Cancelado'   },
+    { key: 'ri-flood-line',             label: 'Accidente'   },
+    { key: 'ri-hand-sanitizer-line',    label: 'Imprevisto'  },
+  ],
+};

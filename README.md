@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# SIGIA
-SIGIA es una applicación web orientada a la gestion de finanzas
-=======
 SIGIA · Sistema de Gestión de Ingresos y Ahorros
 
 Proyecto de aplicación web de finanzas personales. La implementación actual incluye autenticación con Firebase y una estructura inicial para el dashboard; las funcionalidades financieras siguen en desarrollo.
@@ -204,4 +200,3 @@ Ramas:
 MIT © 2026 · Equipo SIGIA
 
 <div align="center"> <sub>Hecho con ☕ y React · <a href="#sigia--sistema-de-gestión-de-ingresos-y-ahorros">Volver arriba</a></sub> </div>
->>>>>>> 5704157ccaf3f16a3b558b5d4e20fc66e9fcd5f9
