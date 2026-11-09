@@ -18,5 +18,6 @@ export function useUserEntries(uid: string) {
 
   const entries = useMemo(() => col.results.map(toDomainEntry), [col.results]);
 
-  return { entries, loading: col.isPending, error: col.error };
+  // `docs` conserva los documentos originales (Timestamp) para editar/eliminar.
+  return { entries, docs: col.results, loading: col.isPending, error: col.error };
 }
