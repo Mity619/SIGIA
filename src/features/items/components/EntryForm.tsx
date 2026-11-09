@@ -10,6 +10,7 @@ import { Field, FieldGroup, FieldLabel } from '@/shared/components/shadcn/field'
 import type { ItemDoc, TransactionType } from '../types/items.types';
 import type { GroupDoc } from '@/features/tags/types/tags.types';
 import type { Account } from '@/features/accounts/types/account.types';
+import { parseInputDate, toInputDate } from '@/shared/utils/date';
 
 interface Props {
   type: TransactionType;
@@ -46,6 +47,7 @@ export function EntryForm({ type, items, accounts, groups, onSubmit, saving }: P
   }, [defaultAccountId, setValue, watch]);
 
   const selectedItemId = watch('itemId');
+  const selectedDate = watch('date');
 
   useEffect(() => {
     if (!selectedItemId) return;
@@ -106,7 +108,15 @@ export function EntryForm({ type, items, accounts, groups, onSubmit, saving }: P
 
         <Field>
           <FieldLabel>Fecha</FieldLabel>
-          <Input type="date" {...register('date', { valueAsDate: true })} aria-invalid={!!errors.date} />
+          <Input
+            type="date"
+            value={toInputDate(selectedDate)}
+            onChange={(e) =>
+              // Fecha local: evita que "9 nov" se guarde como "8 nov" en UTC-5
+              setValue('date', parseInputDate(e.target.value) as Date, { shouldValidate: true })
+            }
+            aria-invalid={!!errors.date}
+          />
           {errors.date && <p className="text-xs text-red-500">{errors.date.message}</p>}
         </Field>
 
