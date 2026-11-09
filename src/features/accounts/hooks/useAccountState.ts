@@ -1,10 +1,14 @@
+import { useEffect, useState } from "react";
 import {
   doc,
   runTransaction,
   serverTimestamp,
 } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 import { useSnackbar } from "notistack";
-import { db } from "@/firebase/config";
+import { db, auth } from "@/firebase/config";
+import { useCollection } from "@/firebase/hooks/useCollection";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { UserDoc } from "@/features/auth/types/user.types";
 import { getAuthErrorMessage } from "@/features/auth/utils/firebaseErrors";
 import {
@@ -97,11 +101,25 @@ const deleteAccountDocument = async (
 
 export default function useAccountState() {
   const { enqueueSnackbar } = useSnackbar();
+  
+  const [uid, setUid] = useState<string | undefined>(auth.currentUser?.uid);
 
-  const removeAccount = async (
-    userId: string,
-    accountId: string,
-  ): Promise<boolean> => {
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUid(user?.uid);
+    });
+    return unsubscribe;
+  }, []);
+
+  const accountsCol = useCollection<Account>("accounts");
+
+  useEffect(() => {
+    if (!uid) return;
+    const unsubscribe = accountsCol.suscribe([["user_id", "==", uid]]);
+    return unsubscribe;
+  }, [uid]); 
+
+  const removeAccount = async (userId: string, accountId: string): Promise<boolean> => {
     try {
       await deleteAccountDocument(userId, accountId);
       return true;
@@ -111,7 +129,15 @@ export default function useAccountState() {
     }
   };
 
+  const accounts = [...accountsCol.results].sort((a, b) => {
+    if (a.default && !b.default) return -1;
+    if (!a.default && b.default) return 1;
+    return a.name.localeCompare(b.name);
+  });
+
   return {
+    accounts,
+    loadingAccounts: accountsCol.isPending,
     ensureDefaultAccount,
     removeAccount,
   };
