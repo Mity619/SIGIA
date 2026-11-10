@@ -1,5 +1,5 @@
 import { lazy, Suspense, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   annualProjection,
@@ -15,6 +15,15 @@ import { useItem } from "../hooks/useItem";
 import { useUserEntries } from "../hooks/useUserEntries";
 import { useAllItems } from "../hooks/useAllItems";
 import { useDeleteEntry } from "../hooks/useDeleteEntry";
+import { useUpdateEntry } from "../hooks/useUpdateEntry";
+import { useUpdateItem } from "../hooks/useUpdateItem";
+import { useArchiveItem } from "../hooks/useArchiveItem";
+import { useGroups } from "@/features/tags/hooks/useGroups";
+import { useAccount } from "@/features/accounts/hooks/useAccount";
+import { Button } from "@/shared/components/shadcn/button";
+import { EditEntryDialog } from "../components/EditEntryDialog";
+import { EditItemDialog } from "../components/EditItemDialog";
+import type { EntryDoc } from "../types/items.types";
 import { toDomainItem } from "../mappers";
 import { EntryHistory, EntryHistorySkeleton } from "../components/EntryHistory";
 import { ItemStats, ItemStatsSkeleton } from "../components/ItemStats";
@@ -40,6 +49,16 @@ export function ItemDetailPage() {
   const { entries, docs, loading: loadingEntries } = useUserEntries(uid);
   const { itemTypeById } = useAllItems(uid);
   const { remove } = useDeleteEntry(uid);
+  const { update: updateEntry, saving: savingEntry } = useUpdateEntry(uid);
+  const { update: updateItem, saving: savingItem } = useUpdateItem(uid);
+  const { archive, archiving } = useArchiveItem(uid);
+  const { groups } = useGroups(uid);
+  const { accounts } = useAccount();
+  const navigate = useNavigate();
+
+  const [entryToEdit, setEntryToEdit] = useState<EntryDoc | null>(null);
+  const [editingItem, setEditingItem] = useState(false);
+  const [confirmArchive, setConfirmArchive] = useState(false);
 
   // Fecha de referencia fija durante la visita (mes actual para los indicadores)
   const [today] = useState(() => new Date());
@@ -90,6 +109,15 @@ export function ItemDetailPage() {
   };
 
   const listPath = item?.type === "income" ? "/ingresos" : "/gastos";
+  const noun = item?.type === "income" ? "ingreso" : "gasto";
+
+  const handleArchive = async () => {
+    const ok = await archive(itemId);
+    if (ok) {
+      setConfirmArchive(false);
+      navigate(listPath, { replace: true });
+    }
+  };
 
   if (loadingItem) {
     return (
@@ -103,7 +131,8 @@ export function ItemDetailPage() {
     );
   }
 
-  if (!item) {
+  // Un concepto archivado (HU-06) se trata como eliminado: no se puede volver a editar.
+  if (!item || item.archived) {
     return (
       <div className="mx-auto flex max-w-lg flex-col items-center gap-4 p-10 text-center">
         <i className="ri-search-line text-4xl text-primary" aria-hidden="true" />
@@ -122,9 +151,26 @@ export function ItemDetailPage() {
           <i className="ri-arrow-left-line" aria-hidden="true" />
           {item.type === "income" ? "Ingresos" : "Gastos"}
         </Link>
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-3xl font-bold text-foreground">{item.name}</h1>
-          <FrequencyBadge frequency={item.frequency} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-3xl font-bold text-foreground">{item.name}</h1>
+            <FrequencyBadge frequency={item.frequency} />
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setEditingItem(true)} aria-label={`Editar ${noun} ${item.name}`}>
+              <i className="ri-edit-line" aria-hidden="true" />
+              Editar
+            </Button>
+            <Button
+              variant="outline"
+              className="text-destructive hover:text-destructive"
+              onClick={() => setConfirmArchive(true)}
+              aria-label={`Eliminar ${noun} ${item.name}`}
+            >
+              <i className="ri-delete-bin-line" aria-hidden="true" />
+              Eliminar
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -157,9 +203,37 @@ export function ItemDetailPage() {
           sortDirection={sortDirection}
           onSortChange={handleSortChange}
           onDeleteClick={setEntryToDelete}
-          onEditClick={(entry) => console.log("Abrir modal de edición para", entry)}
+          onEditClick={setEntryToEdit}
         />
       )}
+
+      <EditEntryDialog
+        entry={entryToEdit}
+        accounts={accounts}
+        saving={savingEntry}
+        onOpenChange={(open) => !open && setEntryToEdit(null)}
+        onSubmit={(changes) => updateEntry(entryToEdit!, changes, itemDocs)}
+      />
+
+      <EditItemDialog
+        open={editingItem}
+        item={item}
+        groups={groups}
+        saving={savingItem}
+        onOpenChange={setEditingItem}
+        onSubmit={(changes) => updateItem(itemId, changes)}
+      />
+
+      <ConfirmDialog
+        open={confirmArchive}
+        onOpenChange={setConfirmArchive}
+        title={`¿Eliminar «${item.name}»?`}
+        description="Dejará de aparecer en tu lista. Su historial se conservará archivado."
+        confirmText="Sí, eliminar"
+        isDestructive
+        isLoading={archiving}
+        onConfirm={handleArchive}
+      />
 
       <ConfirmDialog
         open={!!entryToDelete}
