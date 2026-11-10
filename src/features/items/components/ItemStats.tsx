@@ -1,5 +1,5 @@
 import { Skeleton } from "@/shared/components/shadcn/skeleton";
-import { formatCurrency, formatPercent } from "@/shared/utils/format";
+import { formatCurrency, formatShare } from "@/shared/utils/format";
 import type { ItemMonthStats, TransactionType } from "@/domain";
 
 interface Props {
@@ -19,14 +19,16 @@ interface Tile {
 // HU-12: % sobre ingresos, gasto anual proyectado y ahorro por no repetirlo (§5.1).
 export function ItemStats({ type, stats, annualProjection, savingsIfStopped }: Props) {
   const isExpense = type === "expense";
-  const percent = isExpense ? stats.percentOfIncome : stats.percentOfSameType;
+  // Para gastos y para ingresos la base es el total de ingresos del mes
+  // (percentOfIncome / percentOfSameType en domain/finance.ts).
+  const share = formatShare(stats.itemTotal, stats.incomeTotal);
 
   const tiles: Tile[] = [
     {
       label: "De tus ingresos este mes",
-      value: percent === null ? "—" : formatPercent(percent),
+      value: share ?? "—",
       hint:
-        percent === null
+        share === null
           ? "Aún no registras ingresos este mes"
           : `${formatCurrency(stats.itemTotal)} de ${formatCurrency(stats.incomeTotal)}`,
       icon: "ri-pie-chart-2-line",

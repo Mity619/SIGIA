@@ -1,6 +1,6 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { buildComparison, type Comparison, type ItemMonthStats } from "@/domain";
-import { formatCurrency, formatPercent } from "@/shared/utils/format";
+import { formatCurrency, formatShare } from "@/shared/utils/format";
 
 interface Props {
   itemName: string;
@@ -10,12 +10,20 @@ interface Props {
 // Colores desde los tokens del tema (claro/oscuro)
 const COLORS = ["var(--chart-1)", "var(--muted)"];
 
-function Donut({ comparison, emptyMessage }: { comparison: Comparison; emptyMessage: string }) {
+function Donut({
+  comparison,
+  label,
+  emptyMessage,
+}: {
+  comparison: Comparison;
+  label: string | null;
+  emptyMessage: string;
+}) {
   const { title, percent, slices, exceeds } = comparison;
   const summary =
     percent === null
       ? `${title}: ${emptyMessage}`
-      : `${title}: ${slices[0].name} representa ${formatPercent(percent)}`;
+      : `${title}: ${slices[0].name} representa ${label}`;
 
   return (
     <figure className="flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-5 shadow-sm">
@@ -48,7 +56,7 @@ function Donut({ comparison, emptyMessage }: { comparison: Comparison; emptyMess
             </PieChart>
           </ResponsiveContainer>
           <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-xl font-bold text-foreground">
-            {formatPercent(percent)}
+            {label}
           </span>
         </div>
       )}
@@ -91,8 +99,16 @@ export default function ItemComparisonChart({ itemName, stats }: Props) {
     <section className="flex flex-col gap-3">
       <h2 className="text-lg font-semibold text-foreground">¿Cuánto pesa este gasto?</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Donut comparison={vsExpenses} emptyMessage="Aún no tienes gastos registrados este mes." />
-        <Donut comparison={vsIncome} emptyMessage="Registra tus ingresos del mes para ver esta comparación." />
+        <Donut
+          comparison={vsExpenses}
+          label={formatShare(stats.itemTotal, stats.expenseTotal)}
+          emptyMessage="Aún no tienes gastos registrados este mes."
+        />
+        <Donut
+          comparison={vsIncome}
+          label={formatShare(stats.itemTotal, stats.incomeTotal)}
+          emptyMessage="Registra tus ingresos del mes para ver esta comparación."
+        />
       </div>
     </section>
   );
