@@ -38,8 +38,12 @@ export function useItemFilters() {
   const setFilter = useCallback(
     <K extends keyof ItemFilters>(key: K, value: ItemFilters[K]) => {
       setParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
+        () => {
+          // No usar `prev`: React Router lo toma del último render, y como aplica
+          // la navegación dentro de startTransition, puede estar desactualizado
+          // (escribir en "Máx." devolvía "Mín." a un valor anterior).
+          // window.location sí se actualiza en el momento.
+          const next = new URLSearchParams(window.location.search);
           let raw = "";
           if (value instanceof Date) raw = toInputDate(value);
           else if (value !== undefined && value !== null) raw = String(value);

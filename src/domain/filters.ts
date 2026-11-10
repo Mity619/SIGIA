@@ -26,7 +26,25 @@ export const hasActiveFilters = (f: ItemFilters): boolean =>
   f.minAmount !== undefined ||
   f.maxAmount !== undefined;
 
-const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const FREQUENCIES: readonly Frequency[] = ["eventual", "daily", "weekly", "monthly", "annual"];
+
+/**
+ * Devuelve la etiqueta solo si todavía apunta a algo que existe; si no, undefined.
+ * Evita un "filtro fantasma": un grupo eliminado (o un enlace viejo) dejaba la
+ * lista filtrada mientras el selector mostraba "Todas".
+ */
+export const resolveTag = (
+  tag: string | undefined,
+  groupIds: readonly string[],
+): string | undefined => {
+  if (!tag) return undefined;
+  const [kind, value] = tag.split(":");
+  if (kind === "freq" && FREQUENCIES.includes(value as Frequency)) return tag;
+  if (kind === "group" && value && groupIds.includes(value)) return tag;
+  return undefined;
+};
+
+const startOfDay =(d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const startOfNextDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
 
 const matchesTag = (item: DomainItem, tag: string): boolean => {

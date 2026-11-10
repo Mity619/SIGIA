@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterItems, hasActiveFilters, normalizeText, sortEntries } from "./filters";
+import { filterItems, hasActiveFilters, normalizeText, resolveTag, sortEntries } from "./filters";
 import type { DomainEntry, DomainItem } from "./types";
 
 const item = (id: string, name: string, extra: Partial<DomainItem> = {}): DomainItem => ({
@@ -46,6 +46,21 @@ describe("hasActiveFilters", () => {
     expect(hasActiveFilters({ minAmount: 0 })).toBe(true);
     expect(hasActiveFilters({ tag: "freq:daily" })).toBe(true);
     expect(hasActiveFilters({ to: new Date() })).toBe(true);
+  });
+});
+
+describe("resolveTag (HU-11, filtro fantasma)", () => {
+  const groups = ["g-antojos", "g-casa"];
+  it("conserva frecuencias válidas y grupos que existen", () => {
+    expect(resolveTag("freq:monthly", groups)).toBe("freq:monthly");
+    expect(resolveTag("group:g-casa", groups)).toBe("group:g-casa");
+  });
+  it("descarta grupos eliminados, frecuencias desconocidas y basura", () => {
+    expect(resolveTag("group:g-borrado", groups)).toBeUndefined();
+    expect(resolveTag("group:", groups)).toBeUndefined();
+    expect(resolveTag("freq:quincenal", groups)).toBeUndefined();
+    expect(resolveTag("daily", groups)).toBeUndefined();
+    expect(resolveTag(undefined, groups)).toBeUndefined();
   });
 });
 

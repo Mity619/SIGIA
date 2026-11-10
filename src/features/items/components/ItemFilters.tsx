@@ -4,6 +4,7 @@ import { Input } from "@/shared/components/shadcn/input";
 import { parseInputDate, toInputDate } from "@/shared/utils/date";
 import type { GroupDoc } from "@/features/tags/types/tags.types";
 import { FREQUENCY_OPTIONS } from "../constants/frequencies";
+import { useDraftValue } from "../hooks/useDraftValue";
 
 interface Props {
   filters: Filters;
@@ -21,6 +22,10 @@ const toAmount = (v: string) => (v.trim() === "" ? undefined : Number(v));
 
 // HU-11: 4 filtros combinables (nombre, fecha, etiqueta, valor) + limpiar filtros.
 export function ItemFilters({ filters, groups, isActive, resultCount, onChange, onClear }: Props) {
+  const name = useDraftValue(filters.name ?? "");
+  const min = useDraftValue(filters.minAmount?.toString() ?? "");
+  const max = useDraftValue(filters.maxAmount?.toString() ?? "");
+
   return (
     <section
       aria-label="Filtros"
@@ -32,14 +37,19 @@ export function ItemFilters({ filters, groups, isActive, resultCount, onChange, 
           <Input
             type="search"
             placeholder="Ej. café"
-            value={filters.name ?? ""}
-            onChange={(e) => onChange("name", e.target.value || undefined)}
+            value={name.value}
+            onFocus={name.onFocus}
+            onBlur={name.onBlur}
+            onChange={(e) => {
+              name.setValue(e.target.value);
+              onChange("name", e.target.value || undefined);
+            }}
           />
         </label>
 
-        <fieldset className="flex flex-col gap-1 text-sm">
+        <fieldset className="flex min-w-0 flex-col gap-1 text-sm">
           <legend className="mb-1 font-medium text-foreground">Fecha</legend>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <Input
               type="date"
               aria-label="Desde"
@@ -84,7 +94,7 @@ export function ItemFilters({ filters, groups, isActive, resultCount, onChange, 
           </select>
         </label>
 
-        <fieldset className="flex flex-col gap-1 text-sm">
+        <fieldset className="flex min-w-0 flex-col gap-1 text-sm">
           <legend className="mb-1 font-medium text-foreground">Valor</legend>
           <div className="flex gap-2">
             <Input
@@ -93,8 +103,13 @@ export function ItemFilters({ filters, groups, isActive, resultCount, onChange, 
               min={0}
               placeholder="Mín."
               aria-label="Valor mínimo"
-              value={filters.minAmount ?? ""}
-              onChange={(e) => onChange("minAmount", toAmount(e.target.value))}
+              value={min.value}
+              onFocus={min.onFocus}
+              onBlur={min.onBlur}
+              onChange={(e) => {
+                min.setValue(e.target.value);
+                onChange("minAmount", toAmount(e.target.value));
+              }}
             />
             <Input
               type="number"
@@ -102,8 +117,13 @@ export function ItemFilters({ filters, groups, isActive, resultCount, onChange, 
               min={0}
               placeholder="Máx."
               aria-label="Valor máximo"
-              value={filters.maxAmount ?? ""}
-              onChange={(e) => onChange("maxAmount", toAmount(e.target.value))}
+              value={max.value}
+              onFocus={max.onFocus}
+              onBlur={max.onBlur}
+              onChange={(e) => {
+                max.setValue(e.target.value);
+                onChange("maxAmount", toAmount(e.target.value));
+              }}
             />
           </div>
         </fieldset>

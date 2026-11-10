@@ -4,8 +4,8 @@ import { useGroups } from "@/features/tags/hooks/useGroups";
 import { ItemCard, ItemCardSkeleton } from "../components/ItemCard";
 import { Button } from "@/shared/components/shadcn/button";
 import { Link } from "react-router-dom";
-import { useMemo } from "react";
-import { filterItems } from "@/domain";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { filterItems, hasActiveFilters, resolveTag } from "@/domain";
 import type { TransactionType } from "../types/items.types";
 import { useUserEntries } from "../hooks/useUserEntries";
 import { useItemFilters } from "../hooks/useItemFilters";
@@ -17,9 +17,31 @@ export function ItemsPage({ type }: { type: TransactionType }) {
   const uid = getUserId()!;
   
   const { items, loading } = useItems(uid, type);
-  const { groups } = useGroups(uid);
+  const { groups, loading: loadingGroups } = useGroups(uid);
   const { entries, loading: loadingEntries } = useUserEntries(uid);
-  const { filters, setFilter, clearFilters, isActive } = useItemFilters();
+  const { filters: urlFilters, setFilter, clearFilters } = useItemFilters();
+
+  // useGroups arranca con loading=false y lista vacía antes del primer snapshot;
+  // solo se puede decidir que un grupo "no existe" después de que cargó.
+  const [groupsReady, setGroupsReady] = useState(false);
+  const sawGroupsLoading = useRef(false);
+  useEffect(() => {
+    if (loadingGroups) sawGroupsLoading.current = true;
+    else if (sawGroupsLoading.current) setGroupsReady(true);
+  }, [loadingGroups]);
+
+  // Filtro fantasma: una etiqueta de un grupo eliminado (o un enlace viejo) se ignora
+  // y se quita de la URL, para que la lista coincida con el selector ("Todas").
+  const filters = useMemo(() => {
+    if (!groupsReady) return urlFilters;
+    const tag = resolveTag(urlFilters.tag, groups.map((g) => g.id!));
+    return tag === urlFilters.tag ? urlFilters : { ...urlFilters, tag };
+  }, [urlFilters, groups, groupsReady]);
+  const isActive = hasActiveFilters(filters);
+
+  useEffect(() => {
+    if (urlFilters.tag && !filters.tag) setFilter("tag", undefined);
+  }, [urlFilters.tag, filters.tag, setFilter]);
 
   // HU-11: filtros en memoria (src/domain/filters.ts)
   const visibleItems = useMemo(() => {
