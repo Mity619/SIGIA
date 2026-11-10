@@ -30,7 +30,17 @@ const items: IItem[] = [
   },
   {
     title: "Gastos",
-    url: "/expenses",
+    url: "/gastos",
+    icon: "ri-shopping-bag-3-line",
+  },
+  {
+    title: "Ingresos",
+    url: "/ingresos",
+    icon: "ri-money-dollar-circle-line",
+  },
+  {
+    title: "Etiquetas",
+    url: "/etiquetas",
     icon: "ri-price-tag-3-fill",
   },
 ];
