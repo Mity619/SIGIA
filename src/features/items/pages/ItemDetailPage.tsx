@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   annualProjection,
+  excludeArchived,
   itemMonthStats,
   savingsIfStopped,
   sortEntries,
@@ -47,7 +48,7 @@ export function ItemDetailPage() {
 
   const { item, loading: loadingItem } = useItem(uid, itemId);
   const { entries, docs, loading: loadingEntries } = useUserEntries(uid);
-  const { itemTypeById } = useAllItems(uid);
+  const { itemTypeById, archivedIds } = useAllItems(uid);
   const { remove } = useDeleteEntry(uid);
   const { update: updateEntry, saving: savingEntry } = useUpdateEntry(uid);
   const { update: updateItem, saving: savingItem } = useUpdateItem(uid);
@@ -83,12 +84,14 @@ export function ItemDetailPage() {
     if (!item) return null;
     const domainItem = toDomainItem({ ...item, id: itemId });
     const itemEntries = entries.filter((e) => e.itemId === itemId);
+    // Los gastos e ingresos eliminados (archivados) no suman en los totales del mes
+    const activeEntries = excludeArchived(entries, archivedIds);
     return {
-      stats: itemMonthStats(domainItem, entries, itemTypeById, today),
+      stats: itemMonthStats(domainItem, activeEntries, itemTypeById, today),
       annual: annualProjection(domainItem, itemEntries, today),
       savings: savingsIfStopped(domainItem, itemEntries, today),
     };
-  }, [item, itemId, entries, itemTypeById, today]);
+  }, [item, itemId, entries, itemTypeById, archivedIds, today]);
 
   const handleSortChange = (key: EntrySortKey) => {
     if (key === sortKey) {

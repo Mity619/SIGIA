@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   annualProjection,
   buildComparison,
+  excludeArchived,
   itemMonthStats,
   resolveEntryType,
   savingsIfStopped,
@@ -94,6 +95,31 @@ describe("savingsIfStopped", () => {
     expect(
       savingsIfStopped({ type: "income", frequency: "monthly", lastAmount: 3000000 }, [], NOV),
     ).toBeNull();
+  });
+});
+
+describe("excludeArchived (HU-06)", () => {
+  it("sin archivados devuelve los mismos movimientos", () => {
+    expect(excludeArchived(entries, new Set())).toBe(entries);
+  });
+
+  it("un concepto eliminado deja de sumar en los totales del mes", () => {
+    const active = excludeArchived(entries, new Set(["regalo"]));
+    expect(active.some((e) => e.itemId === "regalo")).toBe(false);
+    expect(totalsByType(active, types, monthRange(NOV))).toEqual({
+      expense: 15500 + 1200000,
+      income: 3000000,
+    });
+    const s = itemMonthStats({ id: "alquiler", type: "expense" }, active, types, NOV);
+    expect(s.expenseTotal).toBe(1215500);
+    expect(s.percentOfSameType).toBe(98.72);
+  });
+
+  it("un ingreso eliminado deja de contar como base de los porcentajes", () => {
+    const active = excludeArchived(entries, new Set(["salario"]));
+    const s = itemMonthStats({ id: "alquiler", type: "expense" }, active, types, NOV);
+    expect(s.incomeTotal).toBe(0);
+    expect(s.percentOfIncome).toBeNull();
   });
 });
 

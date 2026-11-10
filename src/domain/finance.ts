@@ -17,6 +17,17 @@ export const resolveEntryType = (
   itemTypeById: ReadonlyMap<string, TransactionType>,
 ): TransactionType | undefined => entry.type ?? itemTypeById.get(entry.itemId);
 
+/**
+ * Quita los movimientos de conceptos eliminados (archivados, HU-06).
+ * Decisión de producto: el historial se conserva en la base de datos, pero ya no
+ * cuenta en totales, porcentajes ni gráficas.
+ */
+export const excludeArchived = (
+  entries: DomainEntry[],
+  archivedItemIds: ReadonlySet<string>,
+): DomainEntry[] =>
+  archivedItemIds.size === 0 ? entries : entries.filter((e) => !archivedItemIds.has(e.itemId));
+
 /** Suma de montos de los movimientos dentro del rango. */
 export const sumInRange = (entries: DomainEntry[], range: DateRange): number =>
   sumAmounts(entries.filter((e) => isInRange(e.date, range)).map((e) => e.amount));

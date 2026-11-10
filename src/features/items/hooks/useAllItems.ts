@@ -5,7 +5,8 @@ import type { ItemDoc } from "../types/items.types";
 
 /**
  * Todos los conceptos del usuario (incluye archivados), para resolver el tipo de
- * movimientos antiguos que no guardaron `type`.
+ * movimientos antiguos que no guardaron `type` y saber qué conceptos están
+ * archivados (sus movimientos no cuentan en los totales).
  */
 export function useAllItems(uid: string) {
   const col = useCollection<ItemDoc>(`users/${uid}/items`);
@@ -21,5 +22,10 @@ export function useAllItems(uid: string) {
     [col.results],
   );
 
-  return { items: col.results, itemTypeById, loading: col.isPending };
+  const archivedIds = useMemo(
+    () => new Set(col.results.filter((i) => i.archived).map((i) => i.id!)),
+    [col.results],
+  );
+
+  return { items: col.results, itemTypeById, archivedIds, loading: col.isPending };
 }

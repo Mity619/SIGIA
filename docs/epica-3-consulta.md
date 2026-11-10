@@ -54,6 +54,8 @@ npm run build
 
 ## Pendiente o fuera de alcance
 
-- La edición de movimientos (botón de lápiz) sigue siendo un `console.log`. Corresponde a HU-06 (Sprint 2).
 - No hay pruebas de componentes (Testing Library) ni E2E (Playwright). El plan las ubica en el Sprint 6.
-- El ícono "Ahorro" de la biblioteca de grupos (`ri-piggy-bank-line`) no existe en Remix Icon y se ve vacío. Pertenece a HU-08 y hay que reemplazarlo.
+
+## Decisión de producto: conceptos eliminados
+
+Eliminar un gasto o ingreso lo archiva (HU-06): sus movimientos se conservan en Firestore, pero **no cuentan** en los totales del mes, en los porcentajes ni en las gráficas. Se aplica con `excludeArchived` (`src/domain/finance.ts`).
