@@ -10,14 +10,17 @@ import { Button } from "@/shared/components/shadcn/button";
 import type { GroupDoc } from "../types/tags.types";
 
 interface Props {
-  onSubmit: (data: GroupSchema) => void;
+  /** Devuelve true si se guardó; al crear, el formulario se limpia. */
+  onSubmit: (data: GroupSchema) => Promise<boolean>;
   loading: boolean;
   initialData?: GroupDoc | null;
   onCancel?: () => void;
+  /** true si ya existe otro grupo con ese nombre (sin distinguir mayúsculas ni tildes). */
+  isNameTaken?: (name: string) => boolean;
 }
 
-export function GroupForm({ onSubmit, loading, initialData, onCancel }: Props) {
-  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<GroupSchema>({
+export function GroupForm({ onSubmit, loading, initialData, onCancel, isNameTaken }: Props) {
+  const { register, handleSubmit, watch, setValue, reset, setError, formState: { errors } } = useForm<GroupSchema>({
     resolver: zodResolver(groupSchema),
     defaultValues: { name: "", tone: "neutral", iconKey: "" }
   });
@@ -39,7 +42,18 @@ export function GroupForm({ onSubmit, loading, initialData, onCancel }: Props) {
   const iconKey = watch("iconKey");
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <form
+      onSubmit={handleSubmit(async (data) => {
+        if (isNameTaken?.(data.name)) {
+          setError("name", { message: "Ya tienes un grupo con ese nombre" });
+          return;
+        }
+        const ok = await onSubmit(data);
+        // Sin esto, pulsar "Crear Grupo" otra vez creaba un duplicado
+        if (ok && !initialData) reset({ name: "", tone: "neutral", iconKey: "" });
+      })}
+      className="flex flex-col gap-4"
+    >
       <div>
         <label className="text-sm font-medium">Nombre del grupo</label>
         <Input {...register("name")} placeholder="Ej. Mascotas" />
