@@ -1,18 +1,54 @@
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useItems } from "../hooks/useItems";
 import { useGroups } from "@/features/tags/hooks/useGroups";
-import { ItemCard } from "../components/ItemCard";
+import { ItemCard, ItemCardSkeleton } from "../components/ItemCard";
 import { Button } from "@/shared/components/shadcn/button";
 import { Link } from "react-router-dom";
-import { Skeleton } from "@/shared/components/shadcn/skeleton";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { filterItems, hasActiveFilters, resolveTag } from "@/domain";
 import type { TransactionType } from "../types/items.types";
+import { useUserEntries } from "../hooks/useUserEntries";
+import { useItemFilters } from "../hooks/useItemFilters";
+import { ItemFilters } from "../components/ItemFilters";
+import { toDomainItem } from "../mappers";
 
 export function ItemsPage({ type }: { type: TransactionType }) {
   const { getUserId } = useAuth();
   const uid = getUserId()!;
   
   const { items, loading } = useItems(uid, type);
-  const { groups } = useGroups(uid);
+  const { groups, loading: loadingGroups } = useGroups(uid);
+  const { entries, loading: loadingEntries } = useUserEntries(uid);
+  const { filters: urlFilters, setFilter, clearFilters } = useItemFilters();
+
+  // useGroups arranca con loading=false y lista vacía antes del primer snapshot;
+  // solo se puede decidir que un grupo "no existe" después de que cargó.
+  const [groupsReady, setGroupsReady] = useState(false);
+  const sawGroupsLoading = useRef(false);
+  useEffect(() => {
+    if (loadingGroups) sawGroupsLoading.current = true;
+    else if (sawGroupsLoading.current) setGroupsReady(true);
+  }, [loadingGroups]);
+
+  // Filtro fantasma: una etiqueta de un grupo eliminado (o un enlace viejo) se ignora
+  // y se quita de la URL, para que la lista coincida con el selector ("Todas").
+  const filters = useMemo(() => {
+    if (!groupsReady) return urlFilters;
+    const tag = resolveTag(urlFilters.tag, groups.map((g) => g.id!));
+    return tag === urlFilters.tag ? urlFilters : { ...urlFilters, tag };
+  }, [urlFilters, groups, groupsReady]);
+  const isActive = hasActiveFilters(filters);
+
+  useEffect(() => {
+    if (urlFilters.tag && !filters.tag) setFilter("tag", undefined);
+  }, [urlFilters.tag, filters.tag, setFilter]);
+
+  // HU-11: filtros en memoria (src/domain/filters.ts)
+  const visibleItems = useMemo(() => {
+    if (!isActive) return items;
+    const rows = items.map((doc) => ({ ...toDomainItem(doc), doc }));
+    return filterItems(rows, entries, filters).map((r) => r.doc);
+  }, [items, entries, filters, isActive]);
 
   const title = type === "expense" ? "Gastos" : "Ingresos";
   const route = type === "expense" ? "gastos" : "ingresos";
@@ -33,9 +69,20 @@ export function ItemsPage({ type }: { type: TransactionType }) {
         )}
       </div>
 
-      {loading ? (
+      {items.length > 0 && (
+        <ItemFilters
+          filters={filters}
+          groups={groups}
+          isActive={isActive}
+          resultCount={visibleItems.length}
+          onChange={setFilter}
+          onClear={clearFilters}
+        />
+      )}
+
+      {loading || (isActive && loadingEntries) ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 w-full rounded-2xl" />)}
+          {[1, 2, 3, 4, 5, 6].map((i) => <ItemCardSkeleton key={i} />)}
         </div>
       ) : items.length === 0 ? (
         /* 🆕 ESTADO VACÍO MEJORADO */
@@ -55,9 +102,17 @@ export function ItemsPage({ type }: { type: TransactionType }) {
             </Link>
           </Button>
         </div>
+      ) : visibleItems.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-4 py-16 text-center">
+          <i className="ri-search-line text-3xl text-primary" aria-hidden="true" />
+          <p className="font-medium text-foreground">No hay {title.toLowerCase()} que coincidan con estos filtros.</p>
+          <Button type="button" variant="outline" onClick={clearFilters}>
+            Limpiar filtros
+          </Button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
+          {visibleItems.map((item) => (
             <ItemCard 
               key={item.id} 
               item={item} 

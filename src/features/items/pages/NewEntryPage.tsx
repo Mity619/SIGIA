@@ -22,6 +22,7 @@ export function NewEntryPage({ type }: { type: TransactionType }) {
   const handleSubmit = async (values: any) => {
     const success = await submit({
       ...values,
+      type,
       newItem: values.itemId ? undefined : {
         name: values.name,
         type: type,

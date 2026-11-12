@@ -7,7 +7,7 @@ export const ICONS_BY_TONE: Record<IconTone, { key: string; label: string }[]> =
     { key: 'ri-car-line',                 label: 'Auto'     },
     { key: 'ri-wallet-3-line',            label: 'Billetera'},
     { key: 'ri-line-chart-line',          label: 'Inversión'},
-    { key: 'ri-piggy-bank-line',          label: 'Ahorro'   },
+    { key: 'ri-coins-line',               label: 'Ahorro'   },
     { key: 'ri-hand-coin-line',           label: 'Ganancia' },
     { key: 'ri-leaf-line',                label: 'Natural'  },
     { key: 'ri-shopping-bag-3-line',      label: 'Compras'  },
