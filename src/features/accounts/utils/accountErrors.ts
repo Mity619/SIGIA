@@ -4,6 +4,9 @@ import { ACCOUNT_NAME_ERROR_MESSAGES } from "./accountRules";
 export const ACCOUNTS_LOAD_ERROR_MESSAGE =
   "No se pudieron cargar tus cuentas. Inténtalo de nuevo.";
 
+export const ACCOUNT_DETAIL_LOAD_ERROR_MESSAGE =
+  "No pudimos cargar la información de esta cuenta. Inténtalo de nuevo.";
+
 const ACCOUNT_ERROR_MESSAGES: Record<string, string> = {
   ...ACCOUNT_NAME_ERROR_MESSAGES,
   ACCOUNT_HAS_ENTRIES:
