@@ -1,6 +1,8 @@
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared/components/shadcn/button";
 import { Skeleton } from "@/shared/components/shadcn/skeleton";
+import { getAccountDetailPath } from "../constants/account.constants";
 import type { AccountDoc } from "../types/account.types";
 import { canDeleteAccount } from "../utils/accountRules";
 
@@ -75,18 +77,28 @@ interface AccountRowProps {
 
 const AccountRow = ({ account, onDelete }: AccountRowProps) => (
   <li className={rowClass}>
-    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-primary">
+    <Link
+      to={getAccountDetailPath(account.id)}
+      aria-label={`Ver detalle de la cuenta ${account.name}`}
+      className="group -m-1 flex min-w-0 flex-1 items-center gap-3 rounded-lg p-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+    >
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-primary">
+        <i
+          className={cn(
+            "text-xl",
+            account.default ? "ri-wallet-3-line" : "ri-bank-line",
+          )}
+          aria-hidden="true"
+        />
+      </span>
+      <span className="min-w-0 flex-1 truncate font-medium text-foreground group-hover:text-primary">
+        {account.name}
+      </span>
       <i
-        className={cn(
-          "text-xl",
-          account.default ? "ri-wallet-3-line" : "ri-bank-line",
-        )}
+        className="ri-arrow-right-s-line text-xl text-muted-foreground group-hover:text-primary"
         aria-hidden="true"
       />
-    </span>
-    <span className="min-w-0 flex-1 truncate font-medium text-foreground">
-      {account.name}
-    </span>
+    </Link>
     {canDeleteAccount(account) ? (
       <Button
         type="button"
