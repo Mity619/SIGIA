@@ -6,3 +6,4 @@ export { CualquierCosa } from "./CualquierCosa";
 export { PageNotFound } from "./PageNotFound";
 export { Expenses } from "./Expenses";
 export { Accounts } from "./Accounts";
+export { AccountDetail } from "./AccountDetail";

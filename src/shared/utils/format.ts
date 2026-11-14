@@ -46,3 +46,18 @@ export const formatShare = (part: number, total: number): string | null => {
   if (value === 100 && partCents > totalCents) return `> ${formatPercent(100)}`;
   return formatPercent(value);
 };
+
+const dayMonth = new Intl.DateTimeFormat("es-CO", { day: "numeric", month: "short" });
+
+const compactCurrency = new Intl.NumberFormat("es-CO", {
+  style: "currency",
+  currency: "COP",
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
+/** Fecha corta sin año, para ejes de gráficas (p. ej. "14 nov"). */
+export const formatDayMonth = (date: Date): string => dayMonth.format(date);
+
+/** Moneda abreviada para ejes de gráficas (p. ej. "$ 1,2 M"). */
+export const formatCompactCurrency = (amount: number): string => compactCurrency.format(amount);
