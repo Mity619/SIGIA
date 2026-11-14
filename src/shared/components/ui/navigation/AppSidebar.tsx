@@ -39,6 +39,11 @@ const items: IItem[] = [
     icon: "ri-money-dollar-circle-line",
   },
   {
+    title: "Cuentas",
+    url: "/cuentas",
+    icon: "ri-wallet-3-line",
+  },
+  {
     title: "Etiquetas",
     url: "/etiquetas",
     icon: "ri-price-tag-3-fill",

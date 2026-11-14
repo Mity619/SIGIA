@@ -7,6 +7,7 @@ import {
   CualquierCosa,
   PageNotFound,
   Expenses,
+  Accounts,
 } from "@/pages";
 
 import { ItemsPage } from "@/features/items/pages/ItemsPage";
@@ -60,7 +61,10 @@ export const AppRouter = () => {
 
           {/* --- RUTAS DE ETIQUETAS (HU-08, HU-09) --- */}
           <Route path="/etiquetas" element={<TagsPage />} />
-          
+
+          {/* --- RUTAS DE CUENTAS (HU-14) --- */}
+          <Route path="/cuentas" element={<Accounts />} />
+
         </Route>
       </Route>
     </Routes>
