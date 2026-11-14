@@ -4,3 +4,7 @@ export type Account = {
   name: string;
   default: boolean;
 };
+
+export type AccountDoc = Account & { id: string };
+
+export type CreateAccountInput = Pick<Account, "name">;
