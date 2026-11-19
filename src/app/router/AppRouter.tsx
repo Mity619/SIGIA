@@ -7,6 +7,8 @@ import {
   CualquierCosa,
   PageNotFound,
   Expenses,
+  Accounts,
+  AccountDetail,
 } from "@/pages";
 
 import { ItemsPage } from "@/features/items/pages/ItemsPage";
@@ -50,17 +52,26 @@ export const AppRouter = () => {
 
           {/* --- RUTAS DE GASTOS (HU-04, HU-05, HU-06) --- */}
           <Route path="/gastos" element={<ItemsPage type="expense" />} />
-          <Route path="/gastos/nuevo" element={<NewEntryPage type="expense" />} />
+          <Route
+            path="/gastos/nuevo"
+            element={<NewEntryPage type="expense" />}
+          />
           <Route path="/gastos/:id" element={<ItemDetailPage />} />
 
           {/* --- RUTAS DE INGRESOS (HU-07) --- */}
           <Route path="/ingresos" element={<ItemsPage type="income" />} />
-          <Route path="/ingresos/nuevo" element={<NewEntryPage type="income" />} />
+          <Route
+            path="/ingresos/nuevo"
+            element={<NewEntryPage type="income" />}
+          />
           <Route path="/ingresos/:id" element={<ItemDetailPage />} />
 
           {/* --- RUTAS DE ETIQUETAS (HU-08, HU-09) --- */}
           <Route path="/etiquetas" element={<TagsPage />} />
-          
+
+          {/* --- RUTAS DE CUENTAS (HU-14, HU-15) --- */}
+          <Route path="/cuentas" element={<Accounts />} />
+          <Route path="/cuentas/:accountId" element={<AccountDetail />} />
         </Route>
       </Route>
     </Routes>
