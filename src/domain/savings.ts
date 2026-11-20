@@ -1,6 +1,12 @@
 
 import { sumAmounts } from "./money";
 
+import {
+  checklistPeriodRange,
+  type ChecklistFrequency,
+  type DateRange,
+} from "./period";
+
 export interface SavedExpense {
   itemId: string;
   name: string;
@@ -61,3 +67,48 @@ export function calculateSavings(
     details,
   };
 }
+
+/**
+ * Registro de ahorro asociado al periodo de una checklist.
+ *
+ * Las fechas ya deben estar convertidas a Date.
+ * No depende de Firebase.
+ */
+export interface SavingsPeriodRecord extends SavingsRecord {
+  periodStart: Date;
+  periodEnd: Date;
+}
+
+/**
+ * Selecciona únicamente las checklist cuyo periodo
+ * está completamente contenido en el rango consultado.
+ */
+export function filterSavingsByRange(
+  records: SavingsPeriodRecord[],
+  range: DateRange,
+): SavingsPeriodRecord[] {
+  return records.filter(
+    (record) =>
+      record.periodStart.getTime() >= range.from.getTime() &&
+      record.periodEnd.getTime() <= range.to.getTime(),
+  );
+}
+
+/**
+ * Calcula los ahorros correspondientes al día,
+ * semana, mes o año que contiene la fecha indicada.
+ *
+ * Reutiliza los rangos de period.ts y calculateSavings().
+ */
+export function calculateSavingsByPeriod(
+  records: SavingsPeriodRecord[],
+  frequency: ChecklistFrequency,
+  date: Date,
+): SavingsSummary {
+  const range = checklistPeriodRange(frequency, date);
+
+  const filtered = filterSavingsByRange(records, range);
+
+  return calculateSavings(filtered);
+}
+
