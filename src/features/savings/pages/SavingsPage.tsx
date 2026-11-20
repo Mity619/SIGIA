@@ -3,7 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useSnackbar } from "notistack";
 
-import type { SavingsGoal } from "@/domain/savingsGoals";
+import {
+  calculateGoalProgress,
+  type SavingsGoal,
+} from "@/domain/savingsGoals";
+
 import {
   createSavingsGoal,
   getSavingsGoals,
@@ -45,6 +49,18 @@ const PERIODS: {
   { frequency: "monthly", label: "Mensual" },
   { frequency: "annual", label: "Anual" },
 ];
+
+const GOAL_STATUS_LABELS = {
+  pending: "Pendiente",
+  completed: "Completada",
+  failed: "Vencida",
+} as const;
+
+const GOAL_STATUS_STYLES = {
+  pending: "bg-muted text-muted-foreground",
+  completed: "bg-green-100 text-green-800",
+  failed: "bg-red-100 text-red-800",
+} as const;
 
 export function SavingsPage() {
   const { getUserId } = useAuth();
@@ -432,28 +448,82 @@ export function SavingsPage() {
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
-                {goals.map((goal) => (
-                  <div
-                    key={goal.id}
-                    className="space-y-3 rounded-xl border border-border bg-card p-5"
-                  >
-                    <h3 className="font-semibold text-foreground">
-                      {goal.name}
-                    </h3>
+                {goals.map((goal) => {
+                  const progress = calculateGoalProgress(goal);
 
-                    <p className="text-sm text-muted-foreground">
-                      Objetivo: {formatCurrency(goal.targetAmount)}
-                    </p>
+                  return (
+                    <div
+                      key={goal.id}
+                      className="space-y-4 rounded-xl border border-border bg-card p-5 shadow-sm"
+                    >
+                      {/* Nombre y estado */}
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <h3 className="font-semibold text-foreground">
+                          {goal.name}
+                        </h3>
 
-                    <p className="text-sm text-muted-foreground">
-                      Fecha límite: {formatDate(goal.deadline, "short")}
-                    </p>
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-medium ${
+                            GOAL_STATUS_STYLES[progress.status]
+                          }`}
+                        >
+                          {GOAL_STATUS_LABELS[progress.status]}
+                        </span>
+                      </div>
 
-                    <p className="text-xs text-muted-foreground">
-                      Ahorro asignado: {formatCurrency(goal.savedAmount)}
-                    </p>
-                  </div>
-                ))}
+                      {/* Monto asignado y objetivo */}
+                      <div className="space-y-1">
+                        <p className="text-xl font-bold text-foreground">
+                          {formatCurrency(goal.savedAmount)}
+                        </p>
+
+                        <p className="text-sm text-muted-foreground">
+                          de {formatCurrency(goal.targetAmount)}
+                        </p>
+                      </div>
+
+                      {/* Barra de progreso */}
+                      <div
+                        className="h-3 overflow-hidden rounded-full bg-muted"
+                        role="progressbar"
+                        aria-label={`Progreso de ${goal.name}`}
+                        aria-valuenow={progress.percentage}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                      >
+                        <div
+                          className="h-full rounded-full bg-green-600 transition-all"
+                          style={{
+                            width: `${progress.percentage}%`,
+                          }}
+                        />
+                      </div>
+
+                      {/* Porcentaje y dinero restante */}
+                      <div className="flex flex-wrap justify-between gap-2 text-sm">
+                        <span className="font-medium text-foreground">
+                          {progress.percentage.toLocaleString("es-CO", {
+                            maximumFractionDigits: 2,
+                          })}{" "}
+                          % completado
+                        </span>
+
+                        <span className="text-muted-foreground">
+                          {progress.remaining === 0
+                            ? "Meta alcanzada"
+                            : `Faltan ${formatCurrency(progress.remaining)}`}
+                        </span>
+                      </div>
+
+                      {/* Fecha límite */}
+                      <div className="border-t border-border pt-3">
+                        <p className="text-sm text-muted-foreground">
+                          Fecha límite: {formatDate(goal.deadline, "short")}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </section>
