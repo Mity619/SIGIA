@@ -13,6 +13,11 @@ import {
   getSavingsGoals,
 } from "@/features/savings/services/savingsGoals.service";
 import { SavingsGoalForm } from "@/features/savings/components/SavingsGoalForm";
+import {
+  allocateSavingsToGoal,
+  getAvailableSavingsForGoals,
+} from "@/features/savings/services/goalAllocation.service";
+import { calculateGoalAllocation } from "@/domain/goalAllocation";
 import type { SavingsGoalSchema } from "@/features/savings/schemas/savingsGoal.schema";
 
 import {
@@ -34,6 +39,7 @@ import {
 import type { ChecklistFrequency } from "@/domain/period";
 
 import { Button } from "@/shared/components/shadcn/button";
+import { Input } from "@/shared/components/shadcn/input";
 import { Header } from "@/shared/components/ui/sections/Header";
 import {
   formatCurrency,
@@ -76,6 +82,15 @@ export function SavingsPage() {
   // Formulario de creación.
   const [goalDialogOpen, setGoalDialogOpen] = useState(false);
   const [creatingGoal, setCreatingGoal] = useState(false);
+
+  const [availableSavings, setAvailableSavings] = useState<number | null>(null);
+  const [loadingAvailable, setLoadingAvailable] = useState(true);
+  const [availableError, setAvailableError] = useState(false);
+  const [balanceReload, setBalanceReload] = useState(0);
+
+  const [allocationGoalId, setAllocationGoalId] = useState<string | null>(null);
+  const [allocationAmount, setAllocationAmount] = useState("");
+  const [allocating, setAllocating] = useState(false);
 
   // Año consultado y fecha de referencia.
   const [today] = useState(() => new Date());
@@ -164,6 +179,33 @@ export function SavingsPage() {
       active = false;
     };
   }, [uid]);
+
+  // El saldo para las metas no depende del año que se esté visualizando.
+  useEffect(() => {
+    let active = true;
+
+    if (!uid) {
+      return () => { active = false; };
+    }
+
+    getAvailableSavingsForGoals(uid)
+      .then((result) => {
+        if (!active) return;
+        setAvailableSavings(result.available);
+        setAvailableError(false);
+      })
+      .catch((err) => {
+        if (!active) return;
+        console.error("Error al consultar ahorro disponible:", err);
+        setAvailableSavings(null);
+        setAvailableError(true);
+      })
+      .finally(() => {
+        if (active) setLoadingAvailable(false);
+      });
+
+    return () => { active = false; };
+  }, [uid, balanceReload]);
 
   // Los cuatro indicadores se calculan en memoria.
   const summaries = useMemo(
@@ -256,6 +298,62 @@ export function SavingsPage() {
     }
   };
 
+
+  const selectedAllocationGoal = goals.find(
+    (goal) => goal.id === allocationGoalId,
+  );
+
+  const handleAllocateSavings = async () => {
+    if (!uid || !selectedAllocationGoal || availableSavings === null || allocating) {
+      return;
+    }
+
+    const amount = Number(allocationAmount);
+    try {
+      calculateGoalAllocation(selectedAllocationGoal, amount, availableSavings);
+    } catch (err) {
+      enqueueSnackbar(
+        err instanceof Error ? err.message : "El aporte no es válido.",
+        { variant: "error" },
+      );
+      return;
+    }
+
+    setAllocating(true);
+    try {
+      const result = await allocateSavingsToGoal({
+        uid,
+        goalId: selectedAllocationGoal.id,
+        amount,
+      });
+
+      setGoals((current) => current.map((goal) =>
+        goal.id === selectedAllocationGoal.id
+          ? { ...goal, savedAmount: result.newSavedAmount }
+          : goal,
+      ));
+      setAvailableSavings(result.remainingAvailable);
+      setAllocationGoalId(null);
+      setAllocationAmount("");
+
+      enqueueSnackbar(
+        result.completed
+          ? "¡Felicitaciones! Alcanzaste tu meta de ahorro."
+          : "Ahorro asignado correctamente.",
+        { variant: "success" },
+      );
+    } catch (err) {
+      console.error("Error al asignar ahorro:", err);
+      enqueueSnackbar(
+        err instanceof Error ? err.message : "No se pudo asignar el ahorro.",
+        { variant: "error" },
+      );
+      setLoadingAvailable(true);
+      setBalanceReload((current) => current + 1);
+    } finally {
+      setAllocating(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -428,6 +526,40 @@ export function SavingsPage() {
               </Button>
             </div>
 
+            <div className="rounded-xl border border-border bg-card p-5">
+              <p className="text-sm text-muted-foreground">
+                Ahorro disponible para tus metas
+              </p>
+              {loadingAvailable ? (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Calculando ahorro disponible...
+                </p>
+              ) : availableError ? (
+                <div className="mt-3 space-y-3">
+                  <p className="text-sm text-destructive">
+                    No se pudo calcular el ahorro disponible.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setLoadingAvailable(true);
+                      setBalanceReload((current) => current + 1);
+                    }}
+                  >
+                    Reintentar
+                  </Button>
+                </div>
+              ) : (
+                <p className="mt-2 text-2xl font-bold text-foreground">
+                  {formatCurrency(availableSavings ?? 0)}
+                </p>
+              )}
+              <p className="mt-2 text-xs text-muted-foreground">
+                Corresponde a gastos evitados registrados, no a un saldo bancario.
+              </p>
+            </div>
+
             {loadingGoals ? (
               <div className="animate-pulse space-y-3">
                 <div className="h-24 rounded-xl bg-muted" />
@@ -521,6 +653,26 @@ export function SavingsPage() {
                           Fecha límite: {formatDate(goal.deadline, "short")}
                         </p>
                       </div>
+
+                      {progress.status !== "completed" && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full"
+                          disabled={
+                            allocating ||
+                            loadingAvailable ||
+                            availableSavings === null ||
+                            availableSavings <= 0
+                          }
+                          onClick={() => {
+                            setAllocationGoalId(goal.id);
+                            setAllocationAmount("");
+                          }}
+                        >
+                          Asignar ahorro
+                        </Button>
+                      )}
                     </div>
                   );
                 })}
@@ -556,6 +708,84 @@ export function SavingsPage() {
             onSubmit={handleCreateGoal}
             onCancel={() => setGoalDialogOpen(false)}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={allocationGoalId !== null}
+        onOpenChange={(open) => {
+          if (!open && !allocating) {
+            setAllocationGoalId(null);
+            setAllocationAmount("");
+          }
+        }}
+      >
+        <DialogContent showCloseButton={!allocating} className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>Asignar ahorro</DialogTitle>
+            <DialogDescription>
+              Elige cuánto del ahorro disponible deseas destinar a esta meta.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedAllocationGoal && (
+            <div className="space-y-4">
+              <div className="space-y-1 text-sm">
+                <p className="font-medium">{selectedAllocationGoal.name}</p>
+                <p className="text-muted-foreground">
+                  Disponible: {formatCurrency(availableSavings ?? 0)}
+                </p>
+                <p className="text-muted-foreground">
+                  Falta para la meta: {formatCurrency(Math.max(
+                    0,
+                    selectedAllocationGoal.targetAmount - selectedAllocationGoal.savedAmount,
+                  ))}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="allocation-amount" className="text-sm font-medium">
+                  Monto a asignar
+                </label>
+                <Input
+                  id="allocation-amount"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={allocationAmount}
+                  onChange={(event) => setAllocationAmount(event.target.value)}
+                  disabled={allocating}
+                  placeholder="Ej. 20000"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={allocating}
+                  onClick={() => {
+                    setAllocationGoalId(null);
+                    setAllocationAmount("");
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  disabled={
+                    allocating ||
+                    allocationAmount.trim() === "" ||
+                    !Number.isFinite(Number(allocationAmount)) ||
+                    Number(allocationAmount) <= 0
+                  }
+                  onClick={handleAllocateSavings}
+                >
+                  {allocating ? "Guardando..." : "Confirmar aporte"}
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
