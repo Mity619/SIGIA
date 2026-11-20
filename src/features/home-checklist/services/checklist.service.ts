@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  getDoc,
   runTransaction,
   serverTimestamp,
   Timestamp,
@@ -18,6 +19,7 @@ import type { Account } from "@/features/accounts/types/account.types";
 import type { ItemDoc } from "@/features/items/types/items.types";
 import type {
   ChecklistItemRecord,
+  ChecklistPeriodDoc,
 } from "../types/checklist.types";
 
 interface SaveChecklistInput {
@@ -217,3 +219,39 @@ export async function saveChecklist(
     return { status: "created" } as const;
   });
 }
+
+/** Consulta la checklist de un periodo específico. */
+
+export async function getChecklistPeriod(
+  uid: string,
+  frequency: ChecklistFrequency,
+  date: Date,
+): Promise<(ChecklistPeriodDoc & { id: string }) | null> {
+  if (!uid || auth.currentUser?.uid !== uid) {
+    throw new Error("Usuario no autenticado.");
+  }
+
+  if (Number.isNaN(date.getTime())) {
+    throw new Error("La fecha no es válida.");
+  }
+
+  const periodId = getChecklistPeriodId(frequency, date);
+
+  const periodRef = doc(
+    db,
+    `users/${uid}/checklist_periods`,
+    periodId,
+  );
+
+  const snapshot = await getDoc(periodRef);
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return {
+    ...(snapshot.data() as ChecklistPeriodDoc),
+    id: snapshot.id,
+  };
+}
+
