@@ -44,6 +44,11 @@ const items: IItem[] = [
     icon: "ri-wallet-3-line",
   },
   {
+    title: "Ahorros",
+    url: "/ahorro",
+    icon: "ri-safe-2-line",
+  },
+  {
     title: "Etiquetas",
     url: "/etiquetas",
     icon: "ri-price-tag-3-fill",
