@@ -50,7 +50,7 @@ export const Dashboard = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   // Fecha de referencia del periodo actual.
-  const [date] = useState(() => new Date());
+  const [date, setDate] = useState(() => new Date());
 
   // Frecuencia visible y gastos seleccionados.
   const [frequency, setFrequency] =
@@ -101,6 +101,32 @@ export const Dashboard = () => {
     range.to.getDate() - 1,
   );
 
+  // El periodo siguiente no puede comenzar en el futuro.
+  const canGoNext = range.to.getTime() <= Date.now();
+
+  // Navegar utilizando los límites calendario existentes.
+  const changePeriod = (direction: "previous" | "next") => {
+    if (saving) return;
+
+    if (direction === "next" && !canGoNext) return;
+
+    const nextDate =
+      direction === "previous"
+        ? new Date(
+            range.from.getFullYear(),
+            range.from.getMonth(),
+            range.from.getDate() - 1,
+          )
+        : new Date(range.to);
+
+    setDate(nextDate);
+    setCheckedIds([]);
+    setSavedPeriod(null);
+    setCheckingPeriod(true);
+    setPeriodError(false);
+  };
+
+
   // Consultar una sola vez el documento del periodo seleccionado.
   useEffect(() => {
     let active = true;
@@ -137,6 +163,7 @@ export const Dashboard = () => {
     if (saving || next === frequency) return;
 
     setFrequency(next);
+    setDate(new Date());
     setCheckedIds([]);
     setSavedPeriod(null);
     setCheckingPeriod(true);
@@ -245,11 +272,37 @@ export const Dashboard = () => {
             </Button>
           ))}
         </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={saving}
+              onClick={() => changePeriod("previous")}
+            >
+              Anterior
+            </Button>
 
-        <p className="text-sm text-muted-foreground">
-          Periodo: {formatDate(range.from, "short")} —{" "}
-          {formatDate(lastDay, "short")}
-        </p>
+            <div className="text-center">
+              <p className="text-sm font-medium text-foreground">
+                {formatDate(range.from, "short")} —{" "}
+                {formatDate(lastDay, "short")}
+              </p>
+
+              <p className="mt-1 text-xs text-muted-foreground">
+                {canGoNext ? "Periodo anterior" : "Periodo actual"}
+              </p>
+              
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              disabled={saving || !canGoNext}
+              onClick={() => changePeriod("next")}
+            >
+              Siguiente
+            </Button>
+          </div>
 
         {loading || loadingAccounts || checkingPeriod ? (
           // Estado de carga.

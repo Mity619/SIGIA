@@ -11,7 +11,6 @@ import { db, auth } from "@/firebase/config";
 import type { DomainItem } from "@/domain/types";
 import {
   checklistPeriodRange,
-  isChecklistPeriodFinished,
   type ChecklistFrequency,
 } from "@/domain/period";
 import { sumAmounts } from "@/domain/money";
@@ -71,11 +70,6 @@ export async function saveChecklist(
 
   if (Number.isNaN(date.getTime())) {
     throw new Error("La fecha no es válida.");
-  }
-  if (!isChecklistPeriodFinished(frequency, date)) {
-  throw new Error(
-    "Este periodo todavía no ha terminado. Podrás guardar la checklist cuando finalice.",
-  );
   }
 
   const { from, to } = checklistPeriodRange(frequency, date);

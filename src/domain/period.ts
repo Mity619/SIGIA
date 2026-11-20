@@ -66,12 +66,3 @@ export const checklistPeriodRange = (
 export const isInRange = (date: Date, range: DateRange): boolean =>
   date.getTime() >= range.from.getTime() && date.getTime() < range.to.getTime();
 
-export const isChecklistPeriodFinished = (
-  frequency: ChecklistFrequency,
-  date: Date,
-  now: Date = new Date(),
-): boolean => {
-  const { to } = checklistPeriodRange(frequency, date);
-
-  return to.getTime() <= now.getTime();
-};
