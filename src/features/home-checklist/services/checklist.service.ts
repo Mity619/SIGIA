@@ -2,6 +2,9 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
+  query,
+  where,
   runTransaction,
   serverTimestamp,
   Timestamp,
@@ -21,6 +24,8 @@ import type {
   ChecklistItemRecord,
   ChecklistPeriodDoc,
 } from "../types/checklist.types";
+import { yearRange } from "@/domain/period";
+import type { SavingsPeriodRecord } from "@/domain/savings";
 
 interface SaveChecklistInput {
   uid: string;
@@ -254,4 +259,47 @@ export async function getChecklistPeriod(
     id: snapshot.id,
   };
 }
+
+export async function getSavingsPeriods(
+  uid: string,
+  date: Date,
+): Promise<SavingsPeriodRecord[]> {
+  if (!uid || auth.currentUser?.uid !== uid) {
+    throw new Error("Usuario no autenticado.");
+  }
+
+  if (Number.isNaN(date.getTime())) {
+    throw new Error("La fecha no es válida.");
+  }
+
+  const { from, to } = yearRange(date);
+
+  const periodsRef = collection(
+    db,
+    `users/${uid}/checklist_periods`,
+  );
+
+  const periodsQuery = query(
+    periodsRef,
+    where("periodStart", ">=", Timestamp.fromDate(from)),
+    where("periodStart", "<", Timestamp.fromDate(to)),
+  );
+
+  const snapshot = await getDocs(periodsQuery);
+
+  return snapshot.docs.map((document) => {
+    const data = document.data() as ChecklistPeriodDoc;
+
+    return {
+      periodStart: data.periodStart.toDate(),
+      periodEnd: data.periodEnd.toDate(),
+      saved: data.saved.map((expense) => ({
+        itemId: expense.itemId,
+        name: expense.name,
+        amount: expense.amount,
+      })),
+    };
+  });
+}
+
 
