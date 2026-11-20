@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { checklistPeriodRange, dayRange, isInRange, monthRange, weekRange, yearRange } from "./period";
+import {
+  checklistPeriodRange,
+  dayRange,
+  isChecklistPeriodFinished,
+  isInRange,
+  monthRange,
+  weekRange,
+  yearRange,
+} from "./period";
 
 describe("period", () => {
   it("rango del mes es [1 del mes, 1 del siguiente)", () => {
@@ -66,3 +74,56 @@ describe("period", () => {
     expect(checklistPeriodRange("annual", date)).toEqual(yearRange(date));
   });
 });
+
+describe("isChecklistPeriodFinished", () => {
+  it("permite cerrar un día anterior", () => {
+    const result = isChecklistPeriodFinished(
+      "daily",
+      new Date(2026, 10, 19),
+      new Date(2026, 10, 20),
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("no permite cerrar un día en curso", () => {
+    const result = isChecklistPeriodFinished(
+      "daily",
+      new Date(2026, 10, 20),
+      new Date(2026, 10, 20, 18),
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("permite cerrar una semana terminada", () => {
+    const result = isChecklistPeriodFinished(
+      "weekly",
+      new Date(2026, 10, 19),
+      new Date(2026, 10, 23),
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("no permite cerrar un mes en curso", () => {
+    const result = isChecklistPeriodFinished(
+      "monthly",
+      new Date(2026, 10, 20),
+      new Date(2026, 10, 30),
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("permite cerrar un año terminado", () => {
+    const result = isChecklistPeriodFinished(
+      "annual",
+      new Date(2026, 5, 10),
+      new Date(2027, 0, 1),
+    );
+
+    expect(result).toBe(true);
+  });
+});
+

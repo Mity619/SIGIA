@@ -373,6 +373,7 @@ export const Dashboard = () => {
         }}
       >
         <DialogContent
+          className="sm:max-w-[425px]"
           showCloseButton={!saving}
           onInteractOutside={(event) => {
             if (saving) event.preventDefault();
