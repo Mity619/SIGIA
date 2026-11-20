@@ -1,6 +1,24 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { useSnackbar } from "notistack";
+
+import type { SavingsGoal } from "@/domain/savingsGoals";
+import {
+  createSavingsGoal,
+  getSavingsGoals,
+} from "@/features/savings/services/savingsGoals.service";
+import { SavingsGoalForm } from "@/features/savings/components/SavingsGoalForm";
+import type { SavingsGoalSchema } from "@/features/savings/schemas/savingsGoal.schema";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/shadcn/dialog";
+
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { getSavingsPeriods } from "@/features/home-checklist/services/checklist.service";
 
@@ -31,6 +49,17 @@ const PERIODS: {
 export function SavingsPage() {
   const { getUserId } = useAuth();
   const uid = getUserId() ?? "";
+
+  const { enqueueSnackbar } = useSnackbar();
+
+  // Metas de ahorro del usuario.
+  const [goals, setGoals] = useState<SavingsGoal[]>([]);
+  const [loadingGoals, setLoadingGoals] = useState(true);
+  const [goalsError, setGoalsError] = useState(false);
+
+  // Formulario de creación.
+  const [goalDialogOpen, setGoalDialogOpen] = useState(false);
+  const [creatingGoal, setCreatingGoal] = useState(false);
 
   // Año consultado y fecha de referencia.
   const [today] = useState(() => new Date());
@@ -87,6 +116,39 @@ export function SavingsPage() {
     };
   }, [uid, year, reload]);
 
+
+  // Cargar las metas del usuario una sola vez.
+  useEffect(() => {
+    let active = true;
+
+    if (!uid) {
+      return;
+    }
+
+    getSavingsGoals(uid)
+      .then((data) => {
+        if (!active) return;
+
+        setGoals(data);
+        setGoalsError(false);
+      })
+      .catch((error) => {
+        if (!active) return;
+
+        console.error("Error al consultar metas:", error);
+        setGoalsError(true);
+      })
+      .finally(() => {
+        if (active) {
+          setLoadingGoals(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [uid]);
+
   // Los cuatro indicadores se calculan en memoria.
   const summaries = useMemo(
     () =>
@@ -127,6 +189,57 @@ export function SavingsPage() {
     setError(false);
     setReload((value) => value + 1);
   };
+
+
+  const handleCreateGoal = async (
+    data: SavingsGoalSchema,
+  ): Promise<boolean> => {
+    if (!uid || creatingGoal) {
+      return false;
+    }
+
+    setCreatingGoal(true);
+
+    try {
+      const id = await createSavingsGoal(uid, data);
+
+      const newGoal: SavingsGoal = {
+        id,
+        name: data.name.trim(),
+        targetAmount: data.targetAmount,
+        savedAmount: 0,
+        deadline: data.deadline,
+      };
+
+      // Actualizar la lista sin repetir la consulta a Firebase.
+      setGoals((current) =>
+        [...current, newGoal].sort(
+          (a, b) =>
+            a.deadline.getTime() - b.deadline.getTime(),
+        ),
+      );
+
+      setGoalDialogOpen(false);
+
+      enqueueSnackbar("Meta creada correctamente.", {
+        variant: "success",
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Error al crear meta:", error);
+
+      enqueueSnackbar(
+        "No se pudo crear la meta. Inténtalo de nuevo.",
+        { variant: "error" },
+      );
+
+      return false;
+    } finally {
+      setCreatingGoal(false);
+    }
+  };
+
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -277,8 +390,104 @@ export function SavingsPage() {
               </div>
             )}
           </section>
+
+          {/* Metas de ahorro */}
+          <section className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-semibold text-foreground">
+                  Mis metas de ahorro
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Crea y organiza tus objetivos de ahorro.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                onClick={() => setGoalDialogOpen(true)}
+                disabled={creatingGoal || loadingGoals}
+              >
+                Nueva meta
+              </Button>
+            </div>
+
+            {loadingGoals ? (
+              <div className="animate-pulse space-y-3">
+                <div className="h-24 rounded-xl bg-muted" />
+                <div className="h-24 rounded-xl bg-muted" />
+              </div>
+            ) : goalsError ? (
+              <div className="rounded-xl border bg-card p-5">
+                <p className="text-sm text-destructive">
+                  No se pudieron cargar tus metas de ahorro.
+                </p>
+              </div>
+            ) : goals.length === 0 ? (
+              <div className="rounded-xl border bg-card p-6 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Todavía no tienes metas de ahorro.
+                  Crea tu primera meta para comenzar.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {goals.map((goal) => (
+                  <div
+                    key={goal.id}
+                    className="space-y-3 rounded-xl border border-border bg-card p-5"
+                  >
+                    <h3 className="font-semibold text-foreground">
+                      {goal.name}
+                    </h3>
+
+                    <p className="text-sm text-muted-foreground">
+                      Objetivo: {formatCurrency(goal.targetAmount)}
+                    </p>
+
+                    <p className="text-sm text-muted-foreground">
+                      Fecha límite: {formatDate(goal.deadline, "short")}
+                    </p>
+
+                    <p className="text-xs text-muted-foreground">
+                      Ahorro asignado: {formatCurrency(goal.savedAmount)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
         </>
       )}
+      
+      <Dialog
+        open={goalDialogOpen}
+        onOpenChange={(open) => {
+          if (!creatingGoal) {
+            setGoalDialogOpen(open);
+          }
+        }}
+      >
+        <DialogContent
+          showCloseButton={!creatingGoal}
+          className="sm:max-w-[480px]"
+        >
+          <DialogHeader>
+            <DialogTitle>Nueva meta de ahorro</DialogTitle>
+
+            <DialogDescription>
+              Define cuánto quieres ahorrar y la fecha
+              en la que deseas alcanzar tu objetivo.
+            </DialogDescription>
+          </DialogHeader>
+
+          <SavingsGoalForm
+            saving={creatingGoal}
+            onSubmit={handleCreateGoal}
+            onCancel={() => setGoalDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
