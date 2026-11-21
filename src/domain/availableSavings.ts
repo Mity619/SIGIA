@@ -1,10 +1,4 @@
-
-import {
-  fromCents,
-  sumAmounts,
-  toCents,
-} from "./money";
-
+import { fromCents, sumAmounts, toCents } from "./money";
 import type { SavingsPeriodRecord } from "./savings";
 import type { SavingsGoal } from "./savingsGoals";
 
@@ -15,9 +9,7 @@ export interface AvailableSavings {
   excludedPeriods: number;
 }
 
-/**
- * Calcula el ahorro disponible para asignar a metas.
- */
+
 export function calculateAvailableSavings(
   records: SavingsPeriodRecord[],
   goals: SavingsGoal[],
@@ -26,63 +18,51 @@ export function calculateAvailableSavings(
     .filter((record) => {
       const start = record.periodStart.getTime();
       const end = record.periodEnd.getTime();
-
-      return (
-        Number.isFinite(start) &&
-        Number.isFinite(end) &&
-        end > start
-      );
+      return Number.isFinite(start) && Number.isFinite(end) && end > start;
     })
     .sort((a, b) => {
-      const durationA =
-        a.periodEnd.getTime() - a.periodStart.getTime();
-      const durationB =
-        b.periodEnd.getTime() - b.periodStart.getTime();
-
-      return (
-        durationA - durationB ||
-        a.periodStart.getTime() - b.periodStart.getTime()
-      );
+      const durationA = a.periodEnd.getTime() - a.periodStart.getTime();
+      const durationB = b.periodEnd.getTime() - b.periodStart.getTime();
+      return durationA - durationB ||
+        a.periodStart.getTime() - b.periodStart.getTime();
     });
 
-  const accepted: SavingsPeriodRecord[] = [];
+  const acceptedByItem = new Map<string, Array<{ from: number; to: number }>>();
+  const acceptedAmounts: number[] = [];
   let excludedPeriods = 0;
 
   for (const record of ordered) {
-    const overlaps = accepted.some(
-      (selected) =>
-        record.periodStart.getTime() <
-          selected.periodEnd.getTime() &&
-        record.periodEnd.getTime() >
-          selected.periodStart.getTime(),
-    );
+    const from = record.periodStart.getTime();
+    const to = record.periodEnd.getTime();
+    let excludedSomething = false;
 
-    if (overlaps) {
-      excludedPeriods += 1;
-    } else {
-      accepted.push(record);
+    for (const expense of record.saved) {
+      const previous = acceptedByItem.get(expense.itemId) ?? [];
+      const duplicate = previous.some(
+        (period) => from < period.to && to > period.from,
+      );
+
+      if (duplicate) {
+        excludedSomething = true;
+        continue;
+      }
+
+      acceptedAmounts.push(expense.amount);
+      previous.push({ from, to });
+      acceptedByItem.set(expense.itemId, previous);
     }
+
+    if (excludedSomething) excludedPeriods += 1;
   }
 
-  const totalSaved = sumAmounts(
-    accepted.flatMap((record) =>
-      record.saved.map((expense) => expense.amount),
-    ),
-  );
-
-  const totalAssigned = sumAmounts(
-    goals.map((goal) => goal.savedAmount),
-  );
-
-  const availableCents = Math.max(
-    0,
-    toCents(totalSaved) - toCents(totalAssigned),
-  );
-
+  const totalSaved = sumAmounts(acceptedAmounts);
+  const totalAssigned = sumAmounts(goals.map((goal) => goal.savedAmount));
   return {
     totalSaved,
     totalAssigned,
-    available: fromCents(availableCents),
+    available: fromCents(
+      Math.max(0, toCents(totalSaved) - toCents(totalAssigned)),
+    ),
     excludedPeriods,
   };
 }
