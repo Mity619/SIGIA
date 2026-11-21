@@ -126,6 +126,26 @@ describe("checklist.service", () => {
     vi.clearAllMocks();
   });
 
+  it("impide guardar un periodo que todavía no terminó", async () => {
+    vi.useFakeTimers();
+
+    try {
+      // 19 de noviembre de 2026 a las 8:00 a. m.
+      vi.setSystemTime(new Date(2026, 10, 19, 8, 0));
+
+      await expect(saveChecklist(input)).rejects.toThrow(
+        "No puedes guardar la checklist hasta que termine el periodo.",
+      );
+
+      // No debe iniciar ninguna transacción.
+      expect(mocks.runTransaction).not.toHaveBeenCalled();
+      expect(mocks.writes.set).not.toHaveBeenCalled();
+      expect(mocks.writes.update).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("guarda gastos realizados y ahorrados por separado", async () => {
     const tx = createTransaction();
 

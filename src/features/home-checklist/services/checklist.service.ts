@@ -78,6 +78,12 @@ export async function saveChecklist(
   }
 
   const { from, to } = checklistPeriodRange(frequency, date);
+  if (to.getTime() > Date.now()) {
+    throw new Error(
+      "No puedes guardar la checklist hasta que termine el periodo.",
+    );
+  }
+
   const periodId = getChecklistPeriodId(frequency, date);
 
   const selectedItems = items.filter(

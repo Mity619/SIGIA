@@ -401,14 +401,23 @@ export const Dashboard = () => {
                 )}
               </div>
             )}
-
             {/* Checklist del periodo seleccionado */}
             <Checklist
               frequency={frequency}
               items={domainItems}
               checkedIds={selectedIds}
               onToggle={toggleItem}
-              onSave={() => setConfirmOpen(true)}
+              onSave={() => {
+                if (range.to.getTime() > Date.now()) {
+                  enqueueSnackbar(
+                    "Debes esperar a que termine el periodo para guardar la checklist.",
+                    { variant: "warning" },
+                  );
+                  return;
+                }
+
+                setConfirmOpen(true);
+              }}
               saving={saving}
               disabled={!selectedAccountId}
             />
