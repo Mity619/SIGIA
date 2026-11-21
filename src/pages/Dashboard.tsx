@@ -27,6 +27,7 @@ import {
 import { Checklist } from "@/features/home-checklist/components/Checklist";
 import {
   getChecklistPeriod,
+  getRecordedChecklistItemIds,
   saveChecklist,
 } from "@/features/home-checklist/services/checklist.service";
 import type { ChecklistPeriodDoc } from "@/features/home-checklist/types/checklist.types";
@@ -56,6 +57,7 @@ export const Dashboard = () => {
   const [frequency, setFrequency] =
     useState<ChecklistFrequency>("daily");
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
+  const [recordedIds, setRecordedIds] = useState<string[]>([]);
   const [accountId, setAccountId] = useState("");
 
   // Estado del periodo almacenado.
@@ -83,6 +85,14 @@ export const Dashboard = () => {
   const selectedIds = checkedIds.filter((id) =>
     currentIds.has(id),
   );
+  
+  const currentRecordedIds = recordedIds.filter((id) =>
+    currentIds.has(id),
+  );
+
+  const displayedCheckedIds = [
+    ...new Set([...selectedIds, ...currentRecordedIds]),
+  ];
 
   // Reutilizar la cuenta predeterminada si no hay selección.
   const selectedAccountId =
@@ -121,6 +131,7 @@ export const Dashboard = () => {
 
     setDate(nextDate);
     setCheckedIds([]);
+    setRecordedIds([]);
     setSavedPeriod(null);
     setCheckingPeriod(true);
     setPeriodError(false);
@@ -133,11 +144,29 @@ export const Dashboard = () => {
 
     if (!uid) return;
 
+
     getChecklistPeriod(uid, frequency, date)
-      .then((result) => {
+      .then(async (result) => {
         if (!active) return;
 
         setSavedPeriod(result);
+
+        if (result) {
+          // Una checklist guardada ya no necesita
+          // consultar sus movimientos para mostrarse.
+          setRecordedIds([]);
+        } else {
+          const ids = await getRecordedChecklistItemIds(
+            uid,
+            frequency,
+            date,
+          );
+
+          if (!active) return;
+
+          setRecordedIds(ids);
+        }
+
         setPeriodError(false);
       })
       .catch((err) => {
@@ -172,6 +201,8 @@ export const Dashboard = () => {
 
   // Marcar o desmarcar un gasto.
   const toggleItem = (itemId: string) => {
+    if (recordedIds.includes(itemId)) return;
+
     setCheckedIds((current) =>
       current.includes(itemId)
         ? current.filter((id) => id !== itemId)
@@ -405,7 +436,8 @@ export const Dashboard = () => {
             <Checklist
               frequency={frequency}
               items={domainItems}
-              checkedIds={selectedIds}
+              checkedIds={displayedCheckedIds}
+              recordedIds={currentRecordedIds}
               onToggle={toggleItem}
               onSave={() => {
                 if (range.to.getTime() > Date.now()) {

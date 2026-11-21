@@ -320,6 +320,45 @@ export async function getChecklistPeriod(
   };
 }
 
+export async function getRecordedChecklistItemIds(
+  uid: string,
+  frequency: ChecklistFrequency,
+  date: Date,
+): Promise<string[]> {
+  if (!uid || auth.currentUser?.uid !== uid) {
+    throw new Error("Usuario no autenticado.");
+  }
+
+  if (Number.isNaN(date.getTime())) {
+    throw new Error("La fecha no es válida.");
+  }
+
+  const { from, to } = checklistPeriodRange(frequency, date);
+
+  const entriesQuery = query(
+    collection(db, `users/${uid}/entries`),
+    where("date", ">=", Timestamp.fromDate(from)),
+    where("date", "<", Timestamp.fromDate(to)),
+  );
+
+  const snapshot = await getDocs(entriesQuery);
+  const itemIds = new Set<string>();
+
+  for (const entrySnapshot of snapshot.docs) {
+    const entry = entrySnapshot.data();
+
+    if (
+      typeof entry.itemId === "string" &&
+      entry.itemId.length > 0 &&
+      entry.type !== "income"
+    ) {
+      itemIds.add(entry.itemId);
+    }
+  }
+
+  return [...itemIds];
+}
+
 export async function getSavingsPeriods(
   uid: string,
   date: Date,

@@ -8,6 +8,7 @@ interface ChecklistProps {
   frequency: ChecklistFrequency;
   items: DomainItem[];
   checkedIds: string[];
+  recordedIds?: string[];
   onToggle: (itemId: string) => void;
   onSave: () => void;
   saving?: boolean;
@@ -25,6 +26,7 @@ export function Checklist({
   frequency,
   items,
   checkedIds,
+  recordedIds = [],
   onToggle,
   onSave,
   saving = false,
@@ -37,6 +39,7 @@ export function Checklist({
   );
 
   const checked = new Set(checkedIds);
+  const recorded = new Set(recordedIds);
 
   const hasExpenses = expenses.length > 0;
   const isDisabled = disabled || saving;
@@ -68,14 +71,20 @@ export function Checklist({
             >
               <input
                 type="checkbox"
-                checked={checked.has(item.id)}
+                checked={checked.has(item.id) || recorded.has(item.id)}
                 onChange={() => onToggle(item.id)}
-                disabled={isDisabled}
+                disabled={isDisabled || recorded.has(item.id)}
                 className="h-4 w-4 accent-primary"
               />
 
               <span className="min-w-0 flex-1 text-sm font-medium text-foreground">
                 {item.name}
+
+                {recorded.has(item.id) && (
+                  <span className="mt-1 block text-xs font-normal text-green-600">
+                    Ya registrado
+                  </span>
+                )}
               </span>
 
               <span className="shrink-0 text-sm font-semibold text-foreground">
