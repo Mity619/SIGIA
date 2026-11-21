@@ -15,6 +15,7 @@ import { ItemsPage } from "@/features/items/pages/ItemsPage";
 import { NewEntryPage } from "@/features/items/pages/NewEntryPage";
 import { ItemDetailPage } from "@/features/items/pages/ItemDetailPage";
 import { TagsPage } from "@/features/tags/pages/TagsPage";
+import { SavingsPage } from "@/features/savings/pages/SavingsPage";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { PageLoader } from "@/shared/components/ui/sections/PageLoader";
@@ -72,6 +73,9 @@ export const AppRouter = () => {
           {/* --- RUTAS DE CUENTAS (HU-14, HU-15) --- */}
           <Route path="/cuentas" element={<Accounts />} />
           <Route path="/cuentas/:accountId" element={<AccountDetail />} />
+          
+          {/* --- RUTA DE AHORROS (HU-18) --- */}
+          <Route path="/ahorro" element={<SavingsPage />} />
         </Route>
       </Route>
     </Routes>
