@@ -1,5 +1,4 @@
-
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { calculateGoalAllocation } from "./goalAllocation";
 import type { SavingsGoal } from "./savingsGoals";
@@ -69,6 +68,22 @@ describe("calculateGoalAllocation", () => {
         10000,
       ),
     ).toThrow("La meta ya está completada.");
+  });
+
+  it("rechaza aportes a una meta vencida", () => {
+    vi.useFakeTimers();
+
+    try {
+      vi.setSystemTime(new Date(2028, 0, 1));
+
+      expect(() =>
+        calculateGoalAllocation(goal, 10000, 40000),
+      ).toThrow(
+        "No puedes asignar ahorros a una meta vencida.",
+      );
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("evita errores de coma flotante", () => {

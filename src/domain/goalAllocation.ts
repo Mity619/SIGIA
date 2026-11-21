@@ -1,5 +1,8 @@
 import { fromCents, toCents } from "./money";
-import type { SavingsGoal } from "./savingsGoals";
+import {
+  calculateGoalProgress,
+  type SavingsGoal,
+} from "./savingsGoals";
 
 export interface GoalAllocationResult {
   newSavedAmount: number;
@@ -46,6 +49,12 @@ export function calculateGoalAllocation(
 
   if (savedCents >= targetCents) {
     throw new Error("La meta ya está completada.");
+  }
+
+  if (calculateGoalProgress(goal).status === "failed") {
+    throw new Error(
+      "No puedes asignar ahorros a una meta vencida.",
+    );
   }
 
   if (savedCents + amountCents > targetCents) {

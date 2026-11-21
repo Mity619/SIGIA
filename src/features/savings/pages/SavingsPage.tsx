@@ -654,7 +654,7 @@ export function SavingsPage() {
                         </p>
                       </div>
 
-                      {progress.status !== "completed" && (
+                      {progress.status === "pending" && (
                         <Button
                           type="button"
                           variant="outline"
