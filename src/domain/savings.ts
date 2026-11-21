@@ -80,17 +80,21 @@ export interface SavingsPeriodRecord extends SavingsRecord {
 }
 
 /**
- * Selecciona únicamente las checklist cuyo periodo
- * está completamente contenido en el rango consultado.
+ * Filtra las checklist por su fecha de inicio.
  */
 export function filterSavingsByRange(
   records: SavingsPeriodRecord[],
   range: DateRange,
+  includeCrossingPeriods = false,
 ): SavingsPeriodRecord[] {
   return records.filter(
     (record) =>
       record.periodStart.getTime() >= range.from.getTime() &&
-      record.periodEnd.getTime() <= range.to.getTime(),
+      record.periodStart.getTime() < range.to.getTime() &&
+      (
+        includeCrossingPeriods ||
+        record.periodEnd.getTime() <= range.to.getTime()
+      ),
   );
 }
 
@@ -107,7 +111,11 @@ export function calculateSavingsByPeriod(
 ): SavingsSummary {
   const range = checklistPeriodRange(frequency, date);
 
-  const filtered = filterSavingsByRange(records, range);
+ const filtered = filterSavingsByRange(
+  records,
+  range,
+  frequency === "monthly" || frequency === "annual",
+);
 
   return calculateSavings(filtered);
 }

@@ -200,7 +200,7 @@ describe("savings by period", () => {
     expect(result.total).toBe(48000);
   });
 
-  it("no asigna una checklist semanal incompleta a un mes", () => {
+  it("asigna una semana que cruza de mes al mes de inicio", () => {
     const crossingRecord: SavingsPeriodRecord = {
       periodStart: new Date(2026, 9, 26),
       periodEnd: new Date(2026, 10, 2),
@@ -213,13 +213,20 @@ describe("savings by period", () => {
       ],
     };
 
-    const result = calculateSavingsByPeriod(
+    const october = calculateSavingsByPeriod(
+      [crossingRecord],
+      "monthly",
+      new Date(2026, 9, 15),
+    );
+
+    const november = calculateSavingsByPeriod(
       [crossingRecord],
       "monthly",
       new Date(2026, 10, 15),
     );
 
-    expect(result.total).toBe(0);
+    expect(october.total).toBe(10000);
+    expect(november.total).toBe(0);
   });
 
   it("respeta los límites de fecha inclusivo y exclusivo", () => {
@@ -243,4 +250,65 @@ describe("savings by period", () => {
     expect(result.details).toEqual([]);
   });
 });
+
+
+it("contabiliza en marzo una semana que termina en abril", () => {
+  const crossingRecord: SavingsPeriodRecord = {
+    periodStart: new Date(2026, 2, 30),
+    periodEnd: new Date(2026, 3, 6),
+    saved: [
+      {
+        itemId: "salidas",
+        name: "Salidas sociales",
+        amount: 10000,
+      },
+    ],
+  };
+
+  const march = calculateSavingsByPeriod(
+    [crossingRecord],
+    "monthly",
+    new Date(2026, 2, 31),
+  );
+
+  const april = calculateSavingsByPeriod(
+    [crossingRecord],
+    "monthly",
+    new Date(2026, 3, 1),
+  );
+
+  expect(march.total).toBe(10000);
+  expect(april.total).toBe(0);
+});
+
+
+it("asigna una semana que cruza de año al año de inicio", () => {
+  const crossingRecord: SavingsPeriodRecord = {
+    periodStart: new Date(2026, 11, 28),
+    periodEnd: new Date(2027, 0, 4),
+    saved: [
+      {
+        itemId: "transporte",
+        name: "Transporte",
+        amount: 10000,
+      },
+    ],
+  };
+
+  const year2026 = calculateSavingsByPeriod(
+    [crossingRecord],
+    "annual",
+    new Date(2026, 11, 31),
+  );
+
+  const year2027 = calculateSavingsByPeriod(
+    [crossingRecord],
+    "annual",
+    new Date(2027, 0, 1),
+  );
+
+  expect(year2026.total).toBe(10000);
+  expect(year2027.total).toBe(0);
+});
+
 
