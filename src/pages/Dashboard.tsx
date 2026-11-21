@@ -52,6 +52,7 @@ export const Dashboard = () => {
 
   // Fecha de referencia del periodo actual.
   const [date, setDate] = useState(() => new Date());
+  const [now] = useState(() => Date.now());
 
   // Frecuencia visible y gastos seleccionados.
   const [frequency, setFrequency] =
@@ -112,13 +113,18 @@ export const Dashboard = () => {
   );
 
   // El periodo siguiente no puede comenzar en el futuro.
-  const canGoNext = range.to.getTime() <= Date.now();
+  const canGoNext = range.to.getTime() <= now;
 
   // Navegar utilizando los límites calendario existentes.
   const changePeriod = (direction: "previous" | "next") => {
     if (saving) return;
 
-    if (direction === "next" && !canGoNext) return;
+    if (
+      direction === "next" &&
+      range.to.getTime() > Date.now()
+    ) {
+      return;
+    }
 
     const nextDate =
       direction === "previous"
