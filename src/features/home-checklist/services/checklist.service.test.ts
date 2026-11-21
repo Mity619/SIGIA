@@ -5,6 +5,7 @@ import type { DomainItem } from "@/domain/types";
 const mocks = vi.hoisted(() => ({
   runTransaction: vi.fn(),
   getDoc: vi.fn(),
+  getDocs: vi.fn(),
   writes: {
     set: vi.fn(),
     update: vi.fn(),
@@ -41,6 +42,9 @@ vi.mock("firebase/firestore", () => {
     serverTimestamp: () => "SERVER_TIMESTAMP",
     runTransaction: mocks.runTransaction,
     getDoc: mocks.getDoc,
+    getDocs: mocks.getDocs,
+    query: (ref: unknown) => ref,
+    where: () => ({}),
   };
 });
 
@@ -124,6 +128,7 @@ function createTransaction(periodExists = false) {
 describe("checklist.service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.getDocs.mockResolvedValue({ docs: [] });
   });
 
   it("impide guardar un periodo que todavía no terminó", async () => {
@@ -205,4 +210,87 @@ describe("checklist.service", () => {
     expect(result).toBeNull();
     expect(mocks.getDoc).toHaveBeenCalledTimes(1);
   });
+
+  it("no cuenta como ahorro un gasto ya registrado", async () => {
+    const tx = createTransaction();
+
+    mocks.runTransaction.mockImplementation(
+      async (_db, callback) => callback(tx),
+    );
+
+    mocks.getDocs.mockResolvedValue({
+      docs: [
+        {
+          data: () => ({
+            itemId: "transporte",
+            type: "expense",
+            amount: 8000,
+          }),
+        },
+      ],
+    });
+
+    const result = await saveChecklist(input);
+
+    expect(result.status).toBe("created");
+
+    const period = mocks.writes.set.mock.calls.find(
+      ([ref]) => ref.path.includes("checklist_periods"),
+    );
+
+    expect(period).toBeDefined();
+
+    // Café está marcado y Transporte ya fue pagado.
+    expect(period![1].totalSpent).toBe(13000);
+    expect(period![1].totalSaved).toBe(0);
+    expect(period![1].completed).toHaveLength(2);
+    expect(period![1].saved).toHaveLength(0);
+
+    // Solo debe crearse el movimiento nuevo de Café.
+    const entries = mocks.writes.set.mock.calls.filter(
+      ([ref]) => ref.path.includes("/entries/"),
+    );
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0][1].itemId).toBe("cafe");
+  });
+
+  it("no duplica movimientos registrados manualmente", async () => {
+    const tx = createTransaction();
+
+    mocks.runTransaction.mockImplementation(
+      async (_db, callback) => callback(tx),
+    );
+
+    mocks.getDocs.mockResolvedValue({
+      docs: [
+        {
+          data: () => ({
+            itemId: "cafe",
+            type: "expense",
+            amount: 5000,
+          }),
+        },
+      ],
+    });
+
+    const result = await saveChecklist(input);
+
+    expect(result.status).toBe("created");
+
+    const entries = mocks.writes.set.mock.calls.filter(
+      ([ref]) => ref.path.includes("/entries/"),
+    );
+
+    // Café estaba marcado, pero ya tenía un movimiento.
+    expect(entries).toHaveLength(0);
+
+    const period = mocks.writes.set.mock.calls.find(
+      ([ref]) => ref.path.includes("checklist_periods"),
+    );
+
+    expect(period![1].totalSpent).toBe(5000);
+    expect(period![1].totalSaved).toBe(8000);
+  });
+
 });

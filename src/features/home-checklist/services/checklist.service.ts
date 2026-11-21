@@ -114,6 +114,45 @@ export async function saveChecklist(
     throw new Error("La selección contiene gastos inválidos.");
   }
 
+  // Consultar los movimientos que ya existen en el periodo.
+  // Una sola consulta, no una consulta por cada gasto.
+  const existingEntriesQuery = query(
+    collection(db, `users/${uid}/entries`),
+    where("date", ">=", Timestamp.fromDate(from)),
+    where("date", "<", Timestamp.fromDate(to)),
+  );
+
+  const existingEntries = await getDocs(existingEntriesQuery);
+
+  // Agrupar los montos registrados por concepto.
+  const recordedAmounts = new Map<string, number[]>();
+
+  for (const entrySnapshot of existingEntries.docs) {
+    const entry = entrySnapshot.data();
+    const itemId = entry.itemId;
+
+    if (
+      typeof itemId !== "string" ||
+      !itemIds.includes(itemId) ||
+      entry.type === "income"
+    ) {
+      continue;
+    }
+
+    if (
+      !Number.isFinite(entry.amount) ||
+      entry.amount <= 0
+    ) {
+      throw new Error(
+        "Uno de los movimientos existentes tiene un monto inválido.",
+      );
+    }
+
+    const amounts = recordedAmounts.get(itemId) ?? [];
+    amounts.push(entry.amount);
+    recordedAmounts.set(itemId, amounts);
+  }
+
   const itemsCollection = collection(db, `users/${uid}/items`);
   const entriesCollection = collection(db, `users/${uid}/entries`);
 
@@ -176,36 +215,51 @@ export async function saveChecklist(
         amount: item.lastAmount,
       };
 
-      if (checked.has(snapshot.id)) {
-        completed.push(record);
+      const previousAmounts =
+        recordedAmounts.get(snapshot.id) ?? [];
 
-        // Los gastos realizados generan movimientos reales.
-        tx.set(doc(entriesCollection), {
-          itemId: snapshot.id,
-          type: "expense",
-          accountId,
-          name: item.name,
-          amount: item.lastAmount,
-          date: movementDate,
-          groupIds: item.groupIds ?? [],
-          createdAt: serverTimestamp(),
+      const alreadyRecorded = previousAmounts.length > 0;
+
+      if (alreadyRecorded || checked.has(snapshot.id)) {
+        // Los movimientos manuales cuentan como realizados.
+        // Si ya existen, no volvemos a crearlos.
+        completed.push({
+          ...record,
+          amount: alreadyRecorded
+            ? sumAmounts(previousAmounts)
+            : record.amount,
         });
 
-        // Se respeta la fecha del último movimiento.
-        const lastUsedAt = item.lastUsedAt;
-
-        if (
-          !lastUsedAt ||
-          movementDate.toMillis() >= lastUsedAt.toMillis()
-        ) {
-          tx.update(snapshot.ref, {
-            lastAmount: item.lastAmount,
-            lastUsedAt: movementDate,
-            updatedAt: serverTimestamp(),
+        if (!alreadyRecorded) {
+          // Crear el movimiento únicamente cuando
+          // todavía no existe uno para este concepto.
+          tx.set(doc(entriesCollection), {
+            itemId: snapshot.id,
+            type: "expense",
+            accountId,
+            name: item.name,
+            amount: item.lastAmount,
+            date: movementDate,
+            groupIds: item.groupIds ?? [],
+            createdAt: serverTimestamp(),
           });
+
+          const lastUsedAt = item.lastUsedAt;
+
+          if (
+            !lastUsedAt ||
+            movementDate.toMillis() >= lastUsedAt.toMillis()
+          ) {
+            tx.update(snapshot.ref, {
+              lastAmount: item.lastAmount,
+              lastUsedAt: movementDate,
+              updatedAt: serverTimestamp(),
+            });
+          }
         }
       } else {
-        // Los gastos evitados NO generan entries.
+        // Solo ahorrar gastos sin movimientos
+        // existentes y que no fueron marcados.
         saved.push(record);
       }
     }
