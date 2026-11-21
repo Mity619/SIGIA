@@ -16,6 +16,7 @@ import { SavingsGoalForm } from "@/features/savings/components/SavingsGoalForm";
 import {
   allocateSavingsToGoal,
   getAvailableSavingsForGoals,
+  reverseSavingsAllocation,
 } from "@/features/savings/services/goalAllocation.service";
 import { calculateGoalAllocation } from "@/domain/goalAllocation";
 import type { SavingsGoalSchema } from "@/features/savings/schemas/savingsGoal.schema";
@@ -91,6 +92,9 @@ export function SavingsPage() {
   const [allocationGoalId, setAllocationGoalId] = useState<string | null>(null);
   const [allocationAmount, setAllocationAmount] = useState("");
   const [allocating, setAllocating] = useState(false);
+  const [allocationMode, setAllocationMode] = useState<
+    "allocate" | "reverse"
+  >("allocate");
 
   // Año consultado y fecha de referencia.
   const [today] = useState(() => new Date());
@@ -350,6 +354,69 @@ export function SavingsPage() {
       );
       setLoadingAvailable(true);
       setBalanceReload((current) => current + 1);
+    } finally {
+      setAllocating(false);
+    }
+  };
+
+  const handleReverseSavings = async () => {
+    if (!uid || !selectedAllocationGoal || allocating) {
+      return;
+    }
+
+    const amount = Number(allocationAmount);
+
+    if (
+      allocationAmount.trim() === "" ||
+      !Number.isFinite(amount) ||
+      amount <= 0 ||
+      amount > selectedAllocationGoal.savedAmount
+    ) {
+      enqueueSnackbar(
+        "El monto debe ser mayor a cero y no superar lo asignado a la meta.",
+        { variant: "error" },
+      );
+      return;
+    }
+
+    setAllocating(true);
+
+    try {
+      const newSavedAmount = await reverseSavingsAllocation(
+        uid,
+        selectedAllocationGoal.id,
+        amount,
+      );
+
+      setGoals((current) =>
+        current.map((goal) =>
+          goal.id === selectedAllocationGoal.id
+            ? { ...goal, savedAmount: newSavedAmount }
+            : goal,
+        ),
+      );
+
+      setAllocationGoalId(null);
+      setAllocationAmount("");
+
+      // Consultar el saldo compartido actualizado.
+      setAvailableSavings(null);
+      setLoadingAvailable(true);
+      setBalanceReload((current) => current + 1);
+
+      enqueueSnackbar(
+        "Ahorro devuelto correctamente.",
+        { variant: "success" },
+      );
+    } catch (error) {
+      console.error("Error al devolver ahorro:", error);
+
+      enqueueSnackbar(
+        error instanceof Error
+          ? error.message
+          : "No se pudo devolver el ahorro.",
+        { variant: "error" },
+      );
     } finally {
       setAllocating(false);
     }
@@ -666,6 +733,7 @@ export function SavingsPage() {
                             availableSavings <= 0
                           }
                           onClick={() => {
+                            setAllocationMode("allocate");
                             setAllocationGoalId(goal.id);
                             setAllocationAmount("");
                           }}
@@ -673,9 +741,26 @@ export function SavingsPage() {
                           Asignar ahorro
                         </Button>
                       )}
+
+                      {goal.savedAmount > 0 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full"
+                          disabled={allocating}
+                          onClick={() => {
+                            setAllocationMode("reverse");
+                            setAllocationGoalId(goal.id);
+                            setAllocationAmount("");
+                          }}
+                        >
+                          Devolver ahorro
+                        </Button>
+                      )}
                     </div>
                   );
                 })}
+
               </div>
             )}
           </section>
@@ -722,9 +807,15 @@ export function SavingsPage() {
       >
         <DialogContent showCloseButton={!allocating} className="sm:max-w-[480px]">
           <DialogHeader>
-            <DialogTitle>Asignar ahorro</DialogTitle>
+            <DialogTitle>
+              {allocationMode === "reverse"
+                ? "Devolver ahorro"
+                : "Asignar ahorro"}
+            </DialogTitle>
             <DialogDescription>
-              Elige cuánto del ahorro disponible deseas destinar a esta meta.
+              {allocationMode === "reverse"
+                ? "Indica cuánto dinero deseas devolver al ahorro disponible."
+                : "Elige cuánto del ahorro disponible deseas destinar a esta meta."}
             </DialogDescription>
           </DialogHeader>
 
@@ -733,7 +824,9 @@ export function SavingsPage() {
               <div className="space-y-1 text-sm">
                 <p className="font-medium">{selectedAllocationGoal.name}</p>
                 <p className="text-muted-foreground">
-                  Disponible: {formatCurrency(availableSavings ?? 0)}
+                  {allocationMode === "reverse"
+                    ? `Asignado a esta meta: ${formatCurrency(selectedAllocationGoal.savedAmount)}`
+                    : `Disponible: ${formatCurrency(availableSavings ?? 0)}`}
                 </p>
                 <p className="text-muted-foreground">
                   Falta para la meta: {formatCurrency(Math.max(
@@ -779,9 +872,17 @@ export function SavingsPage() {
                     !Number.isFinite(Number(allocationAmount)) ||
                     Number(allocationAmount) <= 0
                   }
-                  onClick={handleAllocateSavings}
-                >
-                  {allocating ? "Guardando..." : "Confirmar aporte"}
+                  onClick={
+                    allocationMode === "reverse"
+                      ? handleReverseSavings
+                      : handleAllocateSavings
+                  }
+                  >
+                    {allocating
+                      ? "Guardando..."
+                      : allocationMode === "reverse"
+                        ? "Confirmar devolución"
+                        : "Confirmar aporte"}
                 </Button>
               </div>
             </div>
