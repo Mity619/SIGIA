@@ -24,6 +24,9 @@ import {
   type ChecklistFrequency,
 } from "@/domain/period";
 
+import { IncomeExpenseOverview } from "@/features/dashboard/components/IncomeExpenseOverview";
+import { useIncomeExpenseSummary } from "@/features/dashboard/hooks/useIncomeExpenseSummary";
+
 import { Checklist } from "@/features/home-checklist/components/Checklist";
 import {
   getChecklistPeriod,
@@ -49,6 +52,7 @@ export const Dashboard = () => {
   const { accounts, loadingAccounts } = useAccount();
   const { items, loading, error } = useItems(uid, "expense");
   const { enqueueSnackbar } = useSnackbar();
+  const incomeExpense = useIncomeExpenseSummary();
 
   // Fecha de referencia del periodo actual.
   const [date, setDate] = useState(() => new Date());
@@ -279,6 +283,8 @@ export const Dashboard = () => {
         title={`Hola ${user?.username || "Usuario"}`}
         paragraph="Bienvenido a tu panel de control. Aquí puedes gestionar tus finanzas personales, ver tus gastos y ahorros, y mucho más."
       />
+
+      <IncomeExpenseOverview {...incomeExpense} />
 
       <section className="mx-auto max-w-5xl space-y-5">
         <div>
