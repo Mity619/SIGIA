@@ -1,7 +1,17 @@
 import type { EntrySortKey, SortDirection } from "@/domain";
 import { Skeleton } from "@/shared/components/shadcn/skeleton";
+import { LoadingRegion } from "@/shared/components/ui/loading/LoadingRegion";
+import { SkeletonText } from "@/shared/components/ui/loading/SkeletonText";
 import { formatCurrency, formatDate } from "@/shared/utils/format";
 import type { EntryDoc } from "../types/items.types";
+
+const sectionClass = "flex flex-col gap-3";
+const headerClass = "flex flex-wrap items-center justify-between gap-2";
+const titleTextClass = "text-lg";
+const sortGroupClass = "flex items-center gap-1 text-sm";
+const listClass = "flex flex-col gap-2";
+const rowClass = "flex items-center justify-between rounded-xl border border-border bg-card p-4";
+const SKELETON_ROWS = 3;
 
 interface Props {
   /** Ya ordenados por la página. */
@@ -28,10 +38,10 @@ export function EntryHistory({
   onEditClick,
 }: Props) {
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold text-foreground">Historial</h2>
-        <div className="flex items-center gap-1 text-sm" role="group" aria-label="Ordenar historial">
+    <section className={sectionClass}>
+      <div className={headerClass}>
+        <h2 className={`${titleTextClass} font-semibold text-foreground`}>Historial</h2>
+        <div className={sortGroupClass} role="group" aria-label="Ordenar historial">
           <span className="mr-1 text-muted-foreground">Ordenar por</span>
           {SORT_OPTIONS.map((o) => {
             const active = sortKey === o.key;
@@ -65,12 +75,9 @@ export function EntryHistory({
           No hay movimientos registrados.
         </p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className={listClass}>
           {entries.map((entry) => (
-            <li
-              key={entry.id}
-              className="flex items-center justify-between rounded-xl border border-border bg-card p-4"
-            >
+            <li key={entry.id} className={rowClass}>
               <div>
                 <p className="font-medium text-foreground">{entry.name}</p>
                 <p className="text-sm text-muted-foreground">
@@ -106,16 +113,27 @@ export function EntryHistory({
 
 export function EntryHistorySkeleton() {
   return (
-    <div className="flex flex-col gap-2">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
-          <div>
-            <Skeleton className="h-4 w-28" />
-            <Skeleton className="mt-2 h-3 w-36" />
-          </div>
-          <Skeleton className="h-5 w-20" />
+    <LoadingRegion className={sectionClass} label="Cargando historial">
+      <div className={headerClass}>
+        <SkeletonText className={titleTextClass} barClassName="w-24" />
+        <div className={sortGroupClass}>
+          <SkeletonText className="mr-1" barClassName="w-20" />
+          {SORT_OPTIONS.map((o) => (
+            <Skeleton key={o.key} className="h-8 w-16 rounded-lg" />
+          ))}
         </div>
-      ))}
-    </div>
+      </div>
+      <div className={listClass}>
+        {Array.from({ length: SKELETON_ROWS }, (_, index) => (
+          <div key={index} className={rowClass}>
+            <div>
+              <SkeletonText className="font-medium" barClassName="w-32" />
+              <SkeletonText className="text-sm" barClassName="w-40" />
+            </div>
+            <SkeletonText className="font-bold" barClassName="w-28" />
+          </div>
+        ))}
+      </div>
+    </LoadingRegion>
   );
 }

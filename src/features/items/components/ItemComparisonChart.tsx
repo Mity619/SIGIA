@@ -1,6 +1,16 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { buildComparison, type Comparison, type ItemMonthStats } from "@/domain";
+import { cn } from "@/lib/utils";
 import { formatCurrency, formatShare } from "@/shared/utils/format";
+import {
+  comparisonGridClass,
+  comparisonSectionClass,
+  comparisonTitleTextClass,
+  donutAreaClass,
+  donutCaptionTextClass,
+  donutCardClass,
+  donutLegendClass,
+} from "./comparisonChartLayout";
 
 interface Props {
   itemName: string;
@@ -26,15 +36,22 @@ function Donut({
       : `${title}: ${slices[0].name} representa ${label}`;
 
   return (
-    <figure className="flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-5 shadow-sm">
-      <figcaption className="text-sm font-medium text-foreground">{title}</figcaption>
+    <figure className={donutCardClass}>
+      <figcaption className={cn(donutCaptionTextClass, "font-medium text-foreground")}>
+        {title}
+      </figcaption>
 
       {percent === null ? (
-        <div className="flex h-48 items-center justify-center px-4 text-center text-sm text-muted-foreground">
+        <div
+          className={cn(
+            donutAreaClass,
+            "flex items-center justify-center px-4 text-center text-sm text-muted-foreground",
+          )}
+        >
           {emptyMessage}
         </div>
       ) : (
-        <div className="relative h-48 w-full" role="img" aria-label={summary}>
+        <div className={cn(donutAreaClass, "relative w-full")} role="img" aria-label={summary}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -62,7 +79,7 @@ function Donut({
       )}
 
       {percent !== null && (
-      <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+      <ul className={cn(donutLegendClass, "text-muted-foreground")}>
         {slices.map((s, i) => (
           <li key={s.name} className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: COLORS[i] }} aria-hidden="true" />
@@ -96,9 +113,11 @@ export default function ItemComparisonChart({ itemName, stats }: Props) {
   );
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-lg font-semibold text-foreground">¿Cuánto pesa este gasto?</h2>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <section className={comparisonSectionClass}>
+      <h2 className={cn(comparisonTitleTextClass, "font-semibold text-foreground")}>
+        ¿Cuánto pesa este gasto?
+      </h2>
+      <div className={comparisonGridClass}>
         <Donut
           comparison={vsExpenses}
           label={formatShare(stats.itemTotal, stats.expenseTotal)}

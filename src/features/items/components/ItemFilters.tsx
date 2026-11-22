@@ -1,6 +1,10 @@
+import type { ReactNode } from "react";
 import type { ItemFilters as Filters } from "@/domain";
+import { cn } from "@/lib/utils";
 import { Button } from "@/shared/components/shadcn/button";
 import { Input } from "@/shared/components/shadcn/input";
+import { Skeleton } from "@/shared/components/shadcn/skeleton";
+import { SkeletonText } from "@/shared/components/ui/loading/SkeletonText";
 import { parseInputDate, toInputDate } from "@/shared/utils/date";
 import type { GroupDoc } from "@/features/tags/types/tags.types";
 import { FREQUENCY_OPTIONS } from "../constants/frequencies";
@@ -18,7 +22,53 @@ interface Props {
 const selectClass =
   "h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
+const sectionClass = "mb-6 flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm";
+const fieldsGridClass = "grid grid-cols-1 gap-3 md:grid-cols-2";
+const dateInputsClass = "grid grid-cols-1 gap-2 sm:grid-cols-2";
+const amountInputsClass = "flex gap-2";
+const footerClass = "flex items-center justify-between gap-2 text-sm";
+
 const toAmount = (v: string) => (v.trim() === "" ? undefined : Number(v));
+
+// Rótulo + control, como cada label/fieldset de los filtros (text-sm, gap-1).
+const FilterFieldSkeleton = ({ children }: { children: ReactNode }) => (
+  <div className="flex flex-col gap-1 text-sm">
+    <SkeletonText barClassName="w-16" />
+    {children}
+  </div>
+);
+
+const inputSkeletonClass = "h-8 w-full rounded-lg";
+
+export function ItemFiltersSkeleton() {
+  return (
+    <div className={sectionClass}>
+      <div className={fieldsGridClass}>
+        <FilterFieldSkeleton>
+          <Skeleton className={inputSkeletonClass} />
+        </FilterFieldSkeleton>
+        <FilterFieldSkeleton>
+          <div className={dateInputsClass}>
+            <Skeleton className={inputSkeletonClass} />
+            <Skeleton className={inputSkeletonClass} />
+          </div>
+        </FilterFieldSkeleton>
+        <FilterFieldSkeleton>
+          <Skeleton className="h-9 w-full rounded-md" />
+        </FilterFieldSkeleton>
+        <FilterFieldSkeleton>
+          <div className={amountInputsClass}>
+            <Skeleton className={inputSkeletonClass} />
+            <Skeleton className={inputSkeletonClass} />
+          </div>
+        </FilterFieldSkeleton>
+      </div>
+      <div className={cn(footerClass, "justify-end")}>
+        <Skeleton className="h-7 w-32 rounded-lg" />
+      </div>
+    </div>
+  );
+}
 
 // HU-11: 4 filtros combinables (nombre, fecha, etiqueta, valor) + limpiar filtros.
 export function ItemFilters({ filters, groups, isActive, resultCount, onChange, onClear }: Props) {
@@ -29,9 +79,9 @@ export function ItemFilters({ filters, groups, isActive, resultCount, onChange, 
   return (
     <section
       aria-label="Filtros"
-      className="mb-6 flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm"
+      className={sectionClass}
     >
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <div className={fieldsGridClass}>
         <label className="flex flex-col gap-1 text-sm">
           <span className="font-medium text-foreground">Nombre</span>
           <Input
@@ -49,7 +99,7 @@ export function ItemFilters({ filters, groups, isActive, resultCount, onChange, 
 
         <fieldset className="flex min-w-0 flex-col gap-1 text-sm">
           <legend className="mb-1 font-medium text-foreground">Fecha</legend>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className={dateInputsClass}>
             <Input
               type="date"
               aria-label="Desde"
@@ -96,7 +146,7 @@ export function ItemFilters({ filters, groups, isActive, resultCount, onChange, 
 
         <fieldset className="flex min-w-0 flex-col gap-1 text-sm">
           <legend className="mb-1 font-medium text-foreground">Valor</legend>
-          <div className="flex gap-2">
+          <div className={amountInputsClass}>
             <Input
               type="number"
               inputMode="decimal"
@@ -129,7 +179,7 @@ export function ItemFilters({ filters, groups, isActive, resultCount, onChange, 
         </fieldset>
       </div>
 
-      <div className="flex items-center justify-between gap-2 text-sm">
+      <div className={footerClass}>
         <span className="text-muted-foreground" aria-live="polite">
           {isActive ? `${resultCount} resultado${resultCount === 1 ? "" : "s"}` : ""}
         </span>

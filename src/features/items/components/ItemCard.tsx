@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import type { ItemDoc } from "../types/items.types";
 import type { GroupDoc } from "@/features/tags/types/tags.types";
 import { Skeleton } from "@/shared/components/shadcn/skeleton";
+import { SkeletonText } from "@/shared/components/ui/loading/SkeletonText";
 import { formatCurrency, formatDate } from "@/shared/utils/format";
 import { FrequencyBadge } from "./FrequencyBadge";
 
@@ -11,6 +12,14 @@ interface Props {
   groups: GroupDoc[];
 }
 
+const cardClass =
+  "flex h-full w-full flex-col justify-between gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm";
+const titleRowClass = "flex items-start justify-between gap-2";
+const titleTextClass = "text-lg leading-tight";
+const amountTextClass = "whitespace-nowrap text-lg";
+const tagsRowClass = "flex flex-wrap items-center gap-1.5";
+const footerClass = "flex items-center gap-1.5 border-t border-border pt-3 text-xs";
+
 // HU-10: cada card muestra valor, ícono de etiqueta y última fecha.
 export function ItemCard({ item, type, groups }: Props) {
   const itemGroups = groups.filter((g) => item.groupIds?.includes(g.id!));
@@ -19,16 +28,16 @@ export function ItemCard({ item, type, groups }: Props) {
   return (
     <Link
       to={`/${type === "expense" ? "gastos" : "ingresos"}/${item.id}`}
-      className="flex h-full w-full flex-col justify-between gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+      className={`${cardClass} transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <h3 className="text-lg font-semibold leading-tight text-foreground">{item.name}</h3>
-        <span className="whitespace-nowrap text-lg font-bold text-foreground" data-testid="item-amount">
+      <div className={titleRowClass}>
+        <h3 className={`${titleTextClass} font-semibold text-foreground`}>{item.name}</h3>
+        <span className={`${amountTextClass} font-bold text-foreground`} data-testid="item-amount">
           {formatCurrency(item.lastAmount || 0)}
         </span>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className={tagsRowClass}>
         <FrequencyBadge frequency={item.frequency} />
         {itemGroups.map((group) => (
           <span
@@ -41,7 +50,7 @@ export function ItemCard({ item, type, groups }: Props) {
         ))}
       </div>
 
-      <div className="flex items-center gap-1.5 border-t border-border pt-3 text-xs text-muted-foreground">
+      <div className={`${footerClass} text-muted-foreground`}>
         <i className="ri-time-line" aria-hidden="true" />
         <span data-testid="item-last-date">
           {lastDate ? `${type === "expense" ? "Último gasto" : "Último ingreso"}: ${formatDate(lastDate)}` : "Sin movimientos registrados"}
@@ -54,18 +63,16 @@ export function ItemCard({ item, type, groups }: Props) {
 /** Esqueleto con la misma estructura que ItemCard (evita saltos de diseño). */
 export function ItemCardSkeleton() {
   return (
-    <div className="flex h-full w-full flex-col justify-between gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-2">
-        <Skeleton className="h-6 w-1/2" />
-        <Skeleton className="h-6 w-20" />
+    <div className={cardClass}>
+      <div className={titleRowClass}>
+        <SkeletonText className={`min-w-0 flex-1 ${titleTextClass}`} barClassName="w-2/3" />
+        <SkeletonText className={amountTextClass} barClassName="w-20" />
       </div>
-      <div className="flex gap-1.5">
+      <div className={tagsRowClass}>
         <Skeleton className="h-6 w-20 rounded-full" />
         <Skeleton className="h-6 w-16 rounded-full" />
       </div>
-      <div className="border-t border-border pt-3">
-        <Skeleton className="h-4 w-40" />
-      </div>
+      <SkeletonText className={footerClass} barClassName="w-40" />
     </div>
   );
 }

@@ -7,6 +7,9 @@ import { ItemSelector } from './ItemSelector';
 import { Button } from '@/shared/components/shadcn/button';
 import { Input } from '@/shared/components/shadcn/input';
 import { Field, FieldGroup, FieldLabel } from '@/shared/components/shadcn/field';
+import { Skeleton } from '@/shared/components/shadcn/skeleton';
+import { LoadingRegion } from '@/shared/components/ui/loading/LoadingRegion';
+import { SkeletonText } from '@/shared/components/ui/loading/SkeletonText';
 import type { ItemDoc, TransactionType } from '../types/items.types';
 import type { GroupDoc } from '@/features/tags/types/tags.types';
 import type { Account } from '@/features/accounts/types/account.types';
@@ -19,6 +22,44 @@ interface Props {
   accounts: Account[]; 
   onSubmit: (values: EntrySchema & { itemId?: string }) => Promise<boolean>;
   saving: boolean;
+}
+
+const tallControlClass = 'h-11 rounded-xl';
+const inputControlClass = 'h-8 rounded-lg';
+// Mismo orden que los campos del formulario: reutilizar, nombre, valor, cuenta, fecha, frecuencia.
+const FIELD_CONTROL_SKELETONS = [
+  tallControlClass,
+  inputControlClass,
+  inputControlClass,
+  tallControlClass,
+  inputControlClass,
+  tallControlClass,
+] as const;
+const GROUP_OPTION_SKELETONS = 2;
+
+/** Misma forma que EntryForm mientras llegan conceptos, grupos y cuentas. */
+export function EntryFormSkeleton() {
+  return (
+    <LoadingRegion label="Cargando formulario">
+      <FieldGroup className="gap-4">
+        {FIELD_CONTROL_SKELETONS.map((controlClass, index) => (
+          <Field key={index}>
+            <SkeletonText className="text-sm leading-snug" barClassName="w-28" />
+            <Skeleton className={controlClass} />
+          </Field>
+        ))}
+        <div className="flex flex-col gap-2">
+          <SkeletonText className="text-sm" barClassName="w-36" />
+          <div className="grid grid-cols-2 gap-2">
+            {Array.from({ length: GROUP_OPTION_SKELETONS }, (_, index) => (
+              <Skeleton key={index} className="h-11 rounded-lg" />
+            ))}
+          </div>
+        </div>
+        <Skeleton className={tallControlClass} />
+      </FieldGroup>
+    </LoadingRegion>
+  );
 }
 
 export function EntryForm({ type, items, accounts, groups, onSubmit, saving }: Props) {

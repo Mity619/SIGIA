@@ -9,8 +9,13 @@ import { filterItems, hasActiveFilters, resolveTag } from "@/domain";
 import type { TransactionType } from "../types/items.types";
 import { useUserEntries } from "../hooks/useUserEntries";
 import { useItemFilters } from "../hooks/useItemFilters";
-import { ItemFilters } from "../components/ItemFilters";
+import { ItemFilters, ItemFiltersSkeleton } from "../components/ItemFilters";
 import { toDomainItem } from "../mappers";
+import { Skeleton } from "@/shared/components/shadcn/skeleton";
+import { LoadingRegion } from "@/shared/components/ui/loading/LoadingRegion";
+
+const itemGridClass = "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3";
+const ITEM_CARD_SKELETON_COUNT = 6;
 
 export function ItemsPage({ type }: { type: TransactionType }) {
   const { getUserId } = useAuth();
@@ -59,31 +64,41 @@ export function ItemsPage({ type }: { type: TransactionType }) {
       {/* Encabezado responsive (se adapta a móviles) */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold text-[#200020]">{title}</h1>
-        {items.length > 0 && (
-          <Button asChild className="bg-[#DA0081] text-white hover:bg-[#E366A7]">
-            <Link to={`/${route}/nuevo`}>
-              <i className="ri-add-line mr-2 text-lg" />
-              Nuevo {type === "expense" ? "Gasto" : "Ingreso"}
-            </Link>
-          </Button>
+        {loading ? (
+          <Skeleton className="h-8 w-36 rounded-lg" />
+        ) : (
+          items.length > 0 && (
+            <Button asChild className="bg-[#DA0081] text-white hover:bg-[#E366A7]">
+              <Link to={`/${route}/nuevo`}>
+                <i className="ri-add-line mr-2 text-lg" />
+                Nuevo {type === "expense" ? "Gasto" : "Ingreso"}
+              </Link>
+            </Button>
+          )
         )}
       </div>
 
-      {items.length > 0 && (
-        <ItemFilters
-          filters={filters}
-          groups={groups}
-          isActive={isActive}
-          resultCount={visibleItems.length}
-          onChange={setFilter}
-          onClear={clearFilters}
-        />
+      {loading ? (
+        <ItemFiltersSkeleton />
+      ) : (
+        items.length > 0 && (
+          <ItemFilters
+            filters={filters}
+            groups={groups}
+            isActive={isActive}
+            resultCount={visibleItems.length}
+            onChange={setFilter}
+            onClear={clearFilters}
+          />
+        )
       )}
 
       {loading || (isActive && loadingEntries) ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((i) => <ItemCardSkeleton key={i} />)}
-        </div>
+        <LoadingRegion className={itemGridClass} label={`Cargando ${title.toLowerCase()}`}>
+          {Array.from({ length: ITEM_CARD_SKELETON_COUNT }, (_, index) => (
+            <ItemCardSkeleton key={index} />
+          ))}
+        </LoadingRegion>
       ) : items.length === 0 ? (
         /* 🆕 ESTADO VACÍO MEJORADO */
         <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 bg-gray-50/50 py-24 px-4 text-center">
@@ -111,7 +126,7 @@ export function ItemsPage({ type }: { type: TransactionType }) {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={itemGridClass}>
           {visibleItems.map((item) => (
             <ItemCard 
               key={item.id} 

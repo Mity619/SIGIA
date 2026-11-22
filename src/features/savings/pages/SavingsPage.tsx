@@ -10,8 +10,16 @@ import {
   getSavingsGoals,
 } from "@/features/savings/services/savingsGoals.service";
 import { SavingsGoalForm } from "@/features/savings/components/SavingsGoalForm";
-import { SavingsOverview } from "@/features/savings/components/SavingsOverview";
-import { SavingsGoalCard } from "@/features/savings/components/SavingsGoalCard";
+import {
+  SavingsOverview,
+  SavingsOverviewSkeleton,
+} from "@/features/savings/components/SavingsOverview";
+import {
+  SavingsGoalCard,
+  SavingsGoalCardSkeleton,
+} from "@/features/savings/components/SavingsGoalCard";
+import { LoadingRegion } from "@/shared/components/ui/loading/LoadingRegion";
+import { SkeletonText } from "@/shared/components/ui/loading/SkeletonText";
 import {
   allocateSavingsToGoal,
   getAvailableSavingsForGoals,
@@ -55,6 +63,10 @@ const PERIODS: {
   { frequency: "monthly", label: "Mensual" },
   { frequency: "annual", label: "Anual" },
 ];
+
+const goalsGridClass = "grid gap-4 sm:grid-cols-2";
+const availableValueTextClass = "mt-2 text-2xl";
+const GOAL_SKELETON_COUNT = 2;
 
 export function SavingsPage() {
   const { getUserId } = useAuth();
@@ -447,19 +459,7 @@ export function SavingsPage() {
       </div>
 
       {loading ? (
-        // Estado de carga.
-        <div className="space-y-5 animate-pulse">
-          <div className="grid gap-4 sm:grid-cols-2">
-            {[1, 2, 3, 4].map((item) => (
-              <div
-                key={item}
-                className="h-28 rounded-xl bg-muted"
-              />
-            ))}
-          </div>
-
-          <div className="h-48 rounded-xl bg-muted" />
-        </div>
+        <SavingsOverviewSkeleton periodCount={PERIODS.length} />
       ) : error ? (
         // Error al consultar Firebase.
         <div className="rounded-xl border border-border bg-card p-6">
@@ -478,15 +478,16 @@ export function SavingsPage() {
           </Button>
         </div>
       ) : (
-        <>
-          <SavingsOverview
-            summaries={summaries}
-            annualSummary={annualSummary}
-            referenceDate={referenceDate}
-            year={year}
-          />
+        <SavingsOverview
+          summaries={summaries}
+          annualSummary={annualSummary}
+          referenceDate={referenceDate}
+          year={year}
+        />
+      )}
 
-          {/* Metas de ahorro */}
+      {/* Metas de ahorro: tienen sus propias cargas, no esperan al resumen del año */}
+      {!error && (
           <section className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -512,9 +513,9 @@ export function SavingsPage() {
                 Ahorro disponible para tus metas
               </p>
               {loadingAvailable ? (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Calculando ahorro disponible...
-                </p>
+                <LoadingRegion label="Calculando ahorro disponible">
+                  <SkeletonText className={availableValueTextClass} barClassName="w-40" />
+                </LoadingRegion>
               ) : availableError ? (
                 <div className="mt-3 space-y-3">
                   <p className="text-sm text-destructive">
@@ -532,7 +533,7 @@ export function SavingsPage() {
                   </Button>
                 </div>
               ) : (
-                <p className="mt-2 text-2xl font-bold text-foreground">
+                <p className={`${availableValueTextClass} font-bold text-foreground`}>
                   {formatCurrency(availableSavings ?? 0)}
                 </p>
               )}
@@ -542,10 +543,11 @@ export function SavingsPage() {
             </div>
 
             {loadingGoals ? (
-              <div className="animate-pulse space-y-3">
-                <div className="h-24 rounded-xl bg-muted" />
-                <div className="h-24 rounded-xl bg-muted" />
-              </div>
+              <LoadingRegion className={goalsGridClass} label="Cargando metas de ahorro">
+                {Array.from({ length: GOAL_SKELETON_COUNT }, (_, index) => (
+                  <SavingsGoalCardSkeleton key={index} />
+                ))}
+              </LoadingRegion>
             ) : goalsError ? (
               <div className="rounded-xl border bg-card p-5">
                 <p className="text-sm text-destructive">
@@ -560,7 +562,7 @@ export function SavingsPage() {
                 </p>
               </div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className={goalsGridClass}>
                 {goals.map((goal) => (
                   <SavingsGoalCard
                     key={goal.id}
@@ -583,9 +585,8 @@ export function SavingsPage() {
               </div>
             )}
           </section>
-        </>
       )}
-      
+
       <Dialog
         open={goalDialogOpen}
         onOpenChange={(open) => {

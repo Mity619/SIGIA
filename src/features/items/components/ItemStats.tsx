@@ -1,6 +1,12 @@
-import { Skeleton } from "@/shared/components/shadcn/skeleton";
+import { SkeletonText } from "@/shared/components/ui/loading/SkeletonText";
 import { formatCurrency, formatShare } from "@/shared/utils/format";
 import type { ItemMonthStats, TransactionType } from "@/domain";
+
+const gridClass = "grid grid-cols-1 gap-4 sm:grid-cols-3";
+const tileClass = "rounded-2xl border border-border bg-card p-5 shadow-sm";
+const labelTextClass = "text-sm";
+const valueTextClass = "mt-2 text-2xl";
+const hintTextClass = "mt-1 text-xs";
 
 interface Props {
   type: TransactionType;
@@ -51,29 +57,32 @@ export function ItemStats({ type, stats, annualProjection, savingsIfStopped }: P
   }
 
   return (
-    <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <dl className={gridClass}>
       {tiles.map((t) => (
-        <div key={t.label} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <dt className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div key={t.label} className={tileClass}>
+          <dt className={`flex items-center gap-2 ${labelTextClass} text-muted-foreground`}>
             <i className={`${t.icon} text-primary`} aria-hidden="true" />
             {t.label}
           </dt>
-          <dd className="mt-2 text-2xl font-bold text-foreground">{t.value}</dd>
-          <dd className="mt-1 text-xs text-muted-foreground">{t.hint}</dd>
+          <dd className={`${valueTextClass} font-bold text-foreground`}>{t.value}</dd>
+          <dd className={`${hintTextClass} text-muted-foreground`}>{t.hint}</dd>
         </div>
       ))}
     </dl>
   );
 }
 
-export function ItemStatsSkeleton() {
+// Los gastos agregan la tarjeta "Ahorro si no lo repites" (savingsIfStopped).
+const TILE_COUNT: Record<TransactionType, number> = { expense: 3, income: 2 };
+
+export function ItemStatsSkeleton({ type }: { type: TransactionType }) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="mt-3 h-7 w-24" />
-          <Skeleton className="mt-2 h-3 w-36" />
+    <div className={gridClass}>
+      {Array.from({ length: TILE_COUNT[type] }, (_, index) => (
+        <div key={index} className={tileClass}>
+          <SkeletonText className={labelTextClass} barClassName="w-32" />
+          <SkeletonText className={valueTextClass} barClassName="w-28" />
+          <SkeletonText className={hintTextClass} barClassName="w-36" />
         </div>
       ))}
     </div>
