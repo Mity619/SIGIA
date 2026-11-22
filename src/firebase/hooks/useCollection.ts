@@ -20,15 +20,26 @@ import type { Unsubscribe } from "firebase/firestore";
 // Tipo de filtro (tupla)
 export type Filter = [string, WhereFilterOp, unknown];
 
+interface UseCollectionOptions {
+  /**
+   * true en hooks de lectura: la colección se considera "cargando" desde el primer
+   * render, para no mostrar el estado vacío antes de la primera respuesta.
+   */
+  initialPending?: boolean;
+}
+
 //? Se tipa el hook con un genérico para tipado de typescript.
-export const useCollection = <T>(table: string) => {
+export const useCollection = <T>(
+  table: string,
+  { initialPending = false }: UseCollectionOptions = {},
+) => {
   // Tipo base de documento
   type Doc<T> = {
     id: string;
   } & T;
 
   const [results, setResults] = useState<Doc<T>[]>([]);
-  const [isPending, setIsPending] = useState(false);
+  const [isPending, setIsPending] = useState(initialPending);
   const [error, setError] = useState<string | null>(null);
 
   //* 1. R -> READ

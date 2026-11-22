@@ -6,6 +6,9 @@ import {
   FieldLabel,
 } from "@/shared/components/shadcn/field";
 import { Input } from "@/shared/components/shadcn/input";
+import { Skeleton } from "@/shared/components/shadcn/skeleton";
+import { LoadingRegion } from "@/shared/components/ui/loading/LoadingRegion";
+import { SkeletonText } from "@/shared/components/ui/loading/SkeletonText";
 import { Link } from "react-router-dom";
 import { useAuthForm } from "../hooks/useAuthForm";
 
@@ -17,6 +20,51 @@ const inputClass =
   "h-11 rounded-xl border-gray-200 bg-gray-50/60 px-4 transition focus-visible:border-[#DA0081] focus-visible:bg-white focus-visible:ring-[#da008133]";
 
 const labelClass = "text-sm font-medium text-[#200020]";
+
+const mainClass =
+  "flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-[#da00830d] via-white to-[#e366a714] px-4 py-10";
+const formClass =
+  "flex w-full max-w-md flex-col rounded-3xl border border-gray-100 bg-white px-8 py-10 shadow-xl shadow-[#2000200d] sm:px-10";
+
+const LOGIN_FIELD_COUNT = 2;
+const SIGNUP_FIELD_COUNT = 3;
+
+/** Misma forma que AuthForm, mientras se comprueba si ya hay una sesión activa. */
+export const AuthFormSkeleton = ({ isSignup = false }: Props) => (
+  <main className={mainClass}>
+    <LoadingRegion className={formClass} label="Comprobando tu sesión">
+      <div className="text-center">
+        <div className="mb-2 flex items-center justify-center gap-3">
+          <Skeleton className="size-12 shrink-0 rounded-2xl" />
+          <SkeletonText className="text-2xl" barClassName="w-44" />
+        </div>
+        <SkeletonText className="mt-2 py-2 text-sm" barClassName="w-64" />
+      </div>
+
+      <div className="my-8">
+        <FieldGroup className="gap-5">
+          {Array.from(
+            { length: isSignup ? SIGNUP_FIELD_COUNT : LOGIN_FIELD_COUNT },
+            (_, index) => (
+              <Field key={index}>
+                <SkeletonText className="text-sm leading-snug" barClassName="w-32" />
+                <Skeleton className="h-11 rounded-xl" />
+              </Field>
+            ),
+          )}
+        </FieldGroup>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <Skeleton className="h-11 rounded-xl" />
+        <SkeletonText className="text-center text-xs" barClassName="w-4" />
+        <Skeleton className="h-11 rounded-xl" />
+      </div>
+
+      <SkeletonText className="pt-6 text-center text-sm" barClassName="w-56" />
+    </LoadingRegion>
+  </main>
+);
 
 export const AuthForm = ({ isSignup = false }: Props) => {
   const {
@@ -31,11 +79,8 @@ export const AuthForm = ({ isSignup = false }: Props) => {
   } = useAuthForm(isSignup);
 
   return (
-    <main className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-[#da00830d] via-white to-[#e366a714] px-4 py-10">
-      <form
-        className="flex w-full max-w-md flex-col rounded-3xl border border-gray-100 bg-white px-8 py-10 shadow-xl shadow-[#2000200d] sm:px-10"
-        onSubmit={handleSubmit}
-      >
+    <main className={mainClass}>
+      <form className={formClass} onSubmit={handleSubmit}>
         <div className="text-center">
           <div className="mb-2 flex items-center gap-3 justify-center">
             <Logo size="lg" onlyLogo={true} />

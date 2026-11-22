@@ -7,6 +7,9 @@ interface ProfilePhotoProps {
   anotherUser?: UserDoc | null;
 }
 
+// Tamaño fijo: la foto de Storage llega después y no debe mover el contenido.
+export const PROFILE_PHOTO_SIZE_CLASS = "size-8";
+
 export const ProfilePhoto = memo(({ anotherUser }: ProfilePhotoProps) => {
   const { user } = useAuth();
 
@@ -23,15 +26,19 @@ export const ProfilePhoto = memo(({ anotherUser }: ProfilePhotoProps) => {
     return (
       <img
         src={photoURL}
-        alt="Profile"
-        className="w-8 h-8 rounded-full object-cover shrink-0"
+        alt="Foto de perfil"
+        width={32}
+        height={32}
+        className={`${PROFILE_PHOTO_SIZE_CLASS} rounded-full bg-muted object-cover shrink-0`}
         onError={() => setFailedPhotoURL(photoURL)}
       />
     );
   }
 
   return (
-    <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-medium shrink-0">
+    <div
+      className={`${PROFILE_PHOTO_SIZE_CLASS} rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium shrink-0`}
+    >
       {targetUser?.username?.charAt(0).toUpperCase()}
     </div>
   );
