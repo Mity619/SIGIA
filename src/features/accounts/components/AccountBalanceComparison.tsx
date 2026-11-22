@@ -23,8 +23,11 @@ import {
   CHART_MARGIN,
   CHART_Y_AXIS_WIDTH,
   chartAreaClass,
+  chartCaptionClass,
   chartCardClass,
   chartTooltipStyle,
+  comparisonGridClass,
+  comparisonTileClass,
 } from "./chartTheme";
 
 interface Props {
@@ -77,7 +80,7 @@ export default function AccountBalanceComparison({ balance, comparisons }: Props
 
   return (
     <figure className={chartCardClass}>
-      <figcaption className="text-base font-semibold text-foreground">
+      <figcaption className={chartCaptionClass}>
         Saldo actual frente a fechas anteriores
       </figcaption>
       <div className={chartAreaClass} role="img" aria-label={summary}>
@@ -116,12 +119,9 @@ export default function AccountBalanceComparison({ balance, comparisons }: Props
         </ResponsiveContainer>
       </div>
 
-      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <dl className={comparisonGridClass}>
         {comparisons.map((comparison) => (
-          <div
-            key={comparison.key}
-            className="flex flex-col gap-1 rounded-xl border border-border p-3"
-          >
+          <div key={comparison.key} className={comparisonTileClass}>
             <dt className="text-sm text-muted-foreground">
               {comparison.label}
               <span className="sr-only"> ({formatDate(comparison.date)})</span>

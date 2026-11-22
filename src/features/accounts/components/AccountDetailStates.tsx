@@ -1,8 +1,23 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/shared/components/shadcn/button";
 import { Skeleton } from "@/shared/components/shadcn/skeleton";
-import { ACCOUNTS_PATH } from "../constants/account.constants";
-import { chartAreaClass, chartCardClass } from "./chartTheme";
+import { LoadingRegion } from "@/shared/components/ui/loading/LoadingRegion";
+import { SkeletonText } from "@/shared/components/ui/loading/SkeletonText";
+import { ACCOUNTS_PATH, BALANCE_COMPARISON_PERIODS } from "../constants/account.constants";
+import { AccountDetailHeaderSkeleton } from "./AccountDetailHeader";
+import {
+  movementListClass,
+  movementRowClass,
+  movementSectionClass,
+  movementTitleClass,
+} from "./AccountMovementList";
+import {
+  chartAreaClass,
+  chartCaptionClass,
+  chartCardClass,
+  comparisonGridClass,
+  comparisonTileClass,
+} from "./chartTheme";
 
 const SKELETON_ROWS = 3;
 
@@ -11,51 +26,53 @@ export const detailPageClass = "mx-auto flex w-full max-w-3xl flex-col gap-6 px-
 const noticeClass =
   "flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-border px-4 py-12 text-center";
 
+/** Misma forma que AccountBalanceChart + AccountBalanceComparison (fallback del lazy). */
 export const AccountChartsSkeleton = () => (
   <>
-    {Array.from({ length: 2 }, (_, index) => (
-      <div key={index} className={chartCardClass}>
-        <Skeleton className="h-5 w-48" />
-        <Skeleton className={chartAreaClass} />
+    <div className={chartCardClass}>
+      <SkeletonText className={chartCaptionClass} barClassName="w-40" />
+      <Skeleton className={chartAreaClass} />
+    </div>
+    <div className={chartCardClass}>
+      <SkeletonText className={chartCaptionClass} barClassName="w-72" />
+      <Skeleton className={chartAreaClass} />
+      <div className={comparisonGridClass}>
+        {BALANCE_COMPARISON_PERIODS.map((period) => (
+          <div key={period.key} className={comparisonTileClass}>
+            <SkeletonText className="text-sm" barClassName="w-28" />
+            <SkeletonText className="font-semibold" barClassName="w-32" />
+            <SkeletonText barClassName="w-16" />
+          </div>
+        ))}
       </div>
-    ))}
+    </div>
   </>
 );
 
-export const AccountMovementListSkeleton = () => (
-  <section className="flex flex-col gap-4">
-    <Skeleton className="h-6 w-36" />
-    <ul className="flex flex-col gap-3">
+const AccountMovementListSkeleton = () => (
+  <div className={movementSectionClass}>
+    <SkeletonText className={movementTitleClass} barClassName="w-36" />
+    <div className={movementListClass}>
       {Array.from({ length: SKELETON_ROWS }, (_, index) => (
-        <li key={index} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
+        <div key={index} className={movementRowClass}>
           <Skeleton className="size-10 shrink-0 rounded-full" />
-          <div className="flex flex-1 flex-col gap-2">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-3 w-24" />
+          <div className="min-w-0 flex-1">
+            <SkeletonText className="font-medium" barClassName="w-32" />
+            <SkeletonText className="text-sm" barClassName="w-24" />
           </div>
-          <Skeleton className="h-5 w-20" />
-        </li>
+          <SkeletonText className="shrink-0 font-bold" barClassName="w-24" />
+        </div>
       ))}
-    </ul>
-  </section>
+    </div>
+  </div>
 );
 
 export const AccountDetailSkeleton = () => (
-  <div className={detailPageClass} aria-busy="true" aria-label="Cargando cuenta">
-    <div className="flex flex-col gap-4 pt-4">
-      <Skeleton className="h-4 w-20" />
-      <div className="flex items-center gap-3">
-        <Skeleton className="size-12 shrink-0 rounded-full" />
-        <Skeleton className="h-8 w-48" />
-      </div>
-      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="mt-3 h-9 w-40" />
-      </div>
-    </div>
+  <LoadingRegion className={detailPageClass} label="Cargando cuenta">
+    <AccountDetailHeaderSkeleton />
     <AccountChartsSkeleton />
     <AccountMovementListSkeleton />
-  </div>
+  </LoadingRegion>
 );
 
 export const AccountNotFound = () => (

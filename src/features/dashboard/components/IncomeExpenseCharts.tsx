@@ -12,11 +12,13 @@ import {
   type TooltipContentProps,
 } from "recharts";
 import { buildComparison, type TransactionType } from "@/domain";
+import { cn } from "@/lib/utils";
 import {
   CHART_AXIS_TICK,
   CHART_MARGIN,
   CHART_Y_AXIS_WIDTH,
   chartAreaClass,
+  chartCaptionClass,
   chartCardClass,
   chartTooltipStyle,
 } from "@/features/accounts/components/chartTheme";
@@ -27,6 +29,18 @@ import {
   formatShare,
 } from "@/shared/utils/format";
 import { INCOME_EXPENSE_SERIES } from "../constants/incomeExpense.constants";
+import {
+  chartsGridClass,
+  donutAreaClass,
+  monthlyColumnClass,
+  monthlyHeaderClass,
+  monthShareListClass,
+  monthShareTileClass,
+  monthShareTitleClass,
+  totalTileClass,
+  totalTilesClass,
+  totalValueTextClass,
+} from "./incomeExpenseLayout";
 import type {
   IncomeExpenseSummary,
   IncomeExpenseTotals,
@@ -77,15 +91,15 @@ const TotalShareChart = ({ total }: { total: IncomeExpenseTotals }) => {
 
   return (
     <figure className={chartCardClass}>
-      <figcaption className="text-base font-semibold text-foreground">Total del periodo</figcaption>
+      <figcaption className={chartCaptionClass}>Total del periodo</figcaption>
 
       {share === null ? (
-        <div className="flex h-48 flex-col items-center justify-center gap-2 text-center">
+        <div className={cn(donutAreaClass, "flex flex-col items-center justify-center gap-2 text-center")}>
           <i className="ri-information-line text-3xl text-muted-foreground" aria-hidden="true" />
           <p className="text-sm text-muted-foreground">{NO_INCOME_PERIOD}</p>
         </div>
       ) : (
-        <div className="relative h-48 w-full" role="img" aria-label={summary}>
+        <div className={cn(donutAreaClass, "relative w-full")} role="img" aria-label={summary}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -117,14 +131,14 @@ const TotalShareChart = ({ total }: { total: IncomeExpenseTotals }) => {
         </div>
       )}
 
-      <dl className="grid grid-cols-2 gap-3">
+      <dl className={totalTilesClass}>
         {SERIES_ORDER.map((type) => (
-          <div key={type} className="rounded-xl bg-muted p-3">
+          <div key={type} className={totalTileClass}>
             <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <SeriesDot color={INCOME_EXPENSE_SERIES[type].color} />
               {INCOME_EXPENSE_SERIES[type].label}
             </dt>
-            <dd className="mt-1 text-sm font-semibold text-foreground sm:text-base">
+            <dd className={cn(totalValueTextClass, "font-semibold text-foreground")}>
               {formatCurrency(total[type])}
             </dd>
           </div>
@@ -175,8 +189,8 @@ const MonthlyComparisonChart = ({ months }: { months: MonthlyIncomeExpense[] }) 
 
   return (
     <figure className={chartCardClass}>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <figcaption className="text-base font-semibold text-foreground">
+      <div className={monthlyHeaderClass}>
+        <figcaption className={chartCaptionClass}>
           Gastos frente a ingresos por mes
         </figcaption>
         <Legend />
@@ -226,13 +240,10 @@ const MonthlyComparisonChart = ({ months }: { months: MonthlyIncomeExpense[] }) 
       </div>
 
       <div>
-        <h3 className="mb-2 text-sm font-medium text-foreground">% de gastos sobre ingresos</h3>
-        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <h3 className={monthShareTitleClass}>% de gastos sobre ingresos</h3>
+        <ul className={monthShareListClass}>
           {months.map((month) => (
-            <li
-              key={month.monthKey}
-              className="flex flex-col rounded-xl border border-border px-3 py-2"
-            >
+            <li key={month.monthKey} className={monthShareTileClass}>
               <span className="text-xs capitalize text-muted-foreground">
                 {formatMonthYear(month.monthStart)}
               </span>
@@ -250,11 +261,11 @@ const MonthlyComparisonChart = ({ months }: { months: MonthlyIncomeExpense[] }) 
 // HU-20: proporción de gastos frente a ingresos en total y por mes.
 export default function IncomeExpenseCharts({ summary }: Props) {
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <div className={chartsGridClass}>
       <div className="lg:col-span-1">
         <TotalShareChart total={summary.total} />
       </div>
-      <div className="lg:col-span-2">
+      <div className={monthlyColumnClass}>
         <MonthlyComparisonChart months={summary.months} />
       </div>
     </div>

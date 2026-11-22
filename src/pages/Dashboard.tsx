@@ -27,7 +27,12 @@ import {
 import { IncomeExpenseOverview } from "@/features/dashboard/components/IncomeExpenseOverview";
 import { useIncomeExpenseSummary } from "@/features/dashboard/hooks/useIncomeExpenseSummary";
 
-import { Checklist } from "@/features/home-checklist/components/Checklist";
+import {
+  Checklist,
+  ChecklistSkeleton,
+  checklistAccountCardClass,
+  checklistAccountLabelClass,
+} from "@/features/home-checklist/components/Checklist";
 import {
   getChecklistPeriod,
   getRecordedChecklistItemIds,
@@ -348,12 +353,7 @@ export const Dashboard = () => {
           </div>
 
         {loading || loadingAccounts || checkingPeriod ? (
-          // Estado de carga.
-          <div className="animate-pulse rounded-2xl border p-6">
-            <div className="mb-4 h-6 w-40 rounded bg-muted" />
-            <div className="mb-3 h-14 rounded bg-muted" />
-            <div className="h-14 rounded bg-muted" />
-          </div>
+          <ChecklistSkeleton />
         ) : error || periodError ? (
           // Estado de error.
           <div className="rounded-xl border p-5">
@@ -413,10 +413,10 @@ export const Dashboard = () => {
           <>
             {/* Cuenta para registrar movimientos */}
             {currentItems.length > 0 && (
-              <div className="rounded-xl border bg-card p-4">
+              <div className={checklistAccountCardClass}>
                 <label
                   htmlFor="checklist-account"
-                  className="mb-2 block text-sm font-medium"
+                  className={checklistAccountLabelClass}
                 >
                   Cuenta para registrar los gastos
                 </label>

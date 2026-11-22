@@ -1,11 +1,35 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { chartAreaClass, chartCardClass } from "@/features/accounts/components/chartTheme";
+import {
+  chartAreaClass,
+  chartCaptionClass,
+  chartCardClass,
+} from "@/features/accounts/components/chartTheme";
+import { cn } from "@/lib/utils";
 import { Button } from "@/shared/components/shadcn/button";
 import { Skeleton } from "@/shared/components/shadcn/skeleton";
-import { NEW_EXPENSE_PATH, NEW_INCOME_PATH } from "../constants/incomeExpense.constants";
+import { LoadingRegion } from "@/shared/components/ui/loading/LoadingRegion";
+import { SkeletonText } from "@/shared/components/ui/loading/SkeletonText";
+import {
+  DEFAULT_RANGE_MONTHS,
+  NEW_EXPENSE_PATH,
+  NEW_INCOME_PATH,
+} from "../constants/incomeExpense.constants";
+import {
+  chartsGridClass,
+  donutAreaClass,
+  monthlyColumnClass,
+  monthlyHeaderClass,
+  monthShareListClass,
+  monthShareTileClass,
+  monthShareTitleClass,
+  totalTileClass,
+  totalTilesClass,
+  totalValueTextClass,
+} from "./incomeExpenseLayout";
 
-const MONTH_SHARE_SKELETONS = 6;
+// Gastos e ingresos: una tarjeta por serie.
+const TOTAL_TILE_COUNT = 2;
 
 // Misma altura mínima que las gráficas para que cambiar de estado no mueva el diseño
 const noticeClass =
@@ -15,26 +39,40 @@ const primaryButtonClass = "rounded-xl px-6 font-semibold hover:bg-orquidea-70";
 
 /** Misma forma que IncomeExpenseCharts: total a la izquierda y meses a la derecha. */
 export const IncomeExpenseChartsSkeleton = () => (
-  <div className="grid grid-cols-1 gap-4 lg:grid-cols-3" aria-busy="true" aria-label="Cargando gráficas">
+  <LoadingRegion className={chartsGridClass} label="Cargando gráficas">
     <div className={chartCardClass}>
-      <Skeleton className="h-5 w-36" />
-      <Skeleton className="mx-auto h-48 w-48 rounded-full" />
-      <div className="grid grid-cols-2 gap-3">
-        <Skeleton className="h-16 rounded-xl" />
-        <Skeleton className="h-16 rounded-xl" />
+      <SkeletonText className={chartCaptionClass} barClassName="w-36" />
+      <div className={cn(donutAreaClass, "flex items-center justify-center")}>
+        <Skeleton className="aspect-square h-full rounded-full" />
       </div>
-    </div>
-    <div className={`${chartCardClass} lg:col-span-2`}>
-      <Skeleton className="h-5 w-64" />
-      <Skeleton className={chartAreaClass} />
-      <Skeleton className="h-4 w-44" />
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {Array.from({ length: MONTH_SHARE_SKELETONS }, (_, index) => (
-          <Skeleton key={index} className="h-14 rounded-xl" />
+      <div className={totalTilesClass}>
+        {Array.from({ length: TOTAL_TILE_COUNT }, (_, index) => (
+          <Skeleton key={index} className={totalTileClass}>
+            <SkeletonText className="text-xs" barClassName="w-14 bg-background/60" />
+            <SkeletonText className={totalValueTextClass} barClassName="w-24 bg-background/60" />
+          </Skeleton>
         ))}
       </div>
     </div>
-  </div>
+    <div className={cn(chartCardClass, monthlyColumnClass)}>
+      <div className={monthlyHeaderClass}>
+        <SkeletonText className={chartCaptionClass} barClassName="w-72" />
+        <SkeletonText className="text-xs" barClassName="w-28" />
+      </div>
+      <Skeleton className={chartAreaClass} />
+      <div>
+        <SkeletonText className={monthShareTitleClass} barClassName="w-48" />
+        <div className={monthShareListClass}>
+          {Array.from({ length: DEFAULT_RANGE_MONTHS }, (_, index) => (
+            <div key={index} className={monthShareTileClass}>
+              <SkeletonText className="text-xs" barClassName="w-24" />
+              <SkeletonText className="text-sm" barClassName="w-12" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </LoadingRegion>
 );
 
 const Notice = ({

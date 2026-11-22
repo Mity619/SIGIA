@@ -2,6 +2,9 @@
 export const chartCardClass =
   "flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm";
 export const chartAreaClass = "h-64 w-full sm:h-72";
+export const chartCaptionClass = "text-base font-semibold text-foreground";
+export const comparisonGridClass = "grid grid-cols-1 gap-3 sm:grid-cols-2";
+export const comparisonTileClass = "flex flex-col gap-1 rounded-xl border border-border p-3";
 
 export const CHART_AXIS_TICK = { fill: "var(--muted-foreground)", fontSize: 12 };
 export const CHART_Y_AXIS_WIDTH = 72;

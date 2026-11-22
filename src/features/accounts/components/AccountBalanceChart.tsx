@@ -19,6 +19,7 @@ import {
   CHART_MARGIN,
   CHART_Y_AXIS_WIDTH,
   chartAreaClass,
+  chartCaptionClass,
   chartCardClass,
   chartTooltipStyle,
 } from "./chartTheme";
@@ -39,7 +40,7 @@ export default function AccountBalanceChart({ series }: Props) {
 
   return (
     <figure className={chartCardClass}>
-      <figcaption className="text-base font-semibold text-foreground">
+      <figcaption className={chartCaptionClass}>
         Evolución del saldo
       </figcaption>
       <div className={chartAreaClass} role="img" aria-label={summary}>
