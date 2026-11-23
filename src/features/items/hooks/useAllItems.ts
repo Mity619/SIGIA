@@ -9,7 +9,7 @@ import type { ItemDoc } from "../types/items.types";
  * archivados (sus movimientos no cuentan en los totales).
  */
 export function useAllItems(uid: string) {
-  const col = useCollection<ItemDoc>(`users/${uid}/items`);
+  const col = useCollection<ItemDoc>(`users/${uid}/items`, { initialPending: true });
 
   useEffect(() => {
     const unsubscribe = col.suscribe([]);

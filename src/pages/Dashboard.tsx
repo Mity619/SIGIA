@@ -24,7 +24,15 @@ import {
   type ChecklistFrequency,
 } from "@/domain/period";
 
-import { Checklist } from "@/features/home-checklist/components/Checklist";
+import { IncomeExpenseOverview } from "@/features/dashboard/components/IncomeExpenseOverview";
+import { useIncomeExpenseSummary } from "@/features/dashboard/hooks/useIncomeExpenseSummary";
+
+import {
+  Checklist,
+  ChecklistSkeleton,
+  checklistAccountCardClass,
+  checklistAccountLabelClass,
+} from "@/features/home-checklist/components/Checklist";
 import {
   getChecklistPeriod,
   getRecordedChecklistItemIds,
@@ -49,6 +57,7 @@ export const Dashboard = () => {
   const { accounts, loadingAccounts } = useAccount();
   const { items, loading, error } = useItems(uid, "expense");
   const { enqueueSnackbar } = useSnackbar();
+  const incomeExpense = useIncomeExpenseSummary();
 
   // Fecha de referencia del periodo actual.
   const [date, setDate] = useState(() => new Date());
@@ -280,6 +289,8 @@ export const Dashboard = () => {
         paragraph="Bienvenido a tu panel de control. Aquí puedes gestionar tus finanzas personales, ver tus gastos y ahorros, y mucho más."
       />
 
+      <IncomeExpenseOverview {...incomeExpense} />
+
       <section className="mx-auto max-w-5xl space-y-5">
         <div>
           <h2 className="text-2xl font-bold text-foreground">
@@ -342,12 +353,7 @@ export const Dashboard = () => {
           </div>
 
         {loading || loadingAccounts || checkingPeriod ? (
-          // Estado de carga.
-          <div className="animate-pulse rounded-2xl border p-6">
-            <div className="mb-4 h-6 w-40 rounded bg-muted" />
-            <div className="mb-3 h-14 rounded bg-muted" />
-            <div className="h-14 rounded bg-muted" />
-          </div>
+          <ChecklistSkeleton />
         ) : error || periodError ? (
           // Estado de error.
           <div className="rounded-xl border p-5">
@@ -407,10 +413,10 @@ export const Dashboard = () => {
           <>
             {/* Cuenta para registrar movimientos */}
             {currentItems.length > 0 && (
-              <div className="rounded-xl border bg-card p-4">
+              <div className={checklistAccountCardClass}>
                 <label
                   htmlFor="checklist-account"
-                  className="mb-2 block text-sm font-medium"
+                  className={checklistAccountLabelClass}
                 >
                   Cuenta para registrar los gastos
                 </label>

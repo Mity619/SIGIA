@@ -142,7 +142,7 @@ export default function useAccountState() {
     return unsubscribe;
   }, []);
 
-  const accountsCol = useCollection<Account>(ACCOUNTS_COLLECTION);
+  const accountsCol = useCollection<Account>(ACCOUNTS_COLLECTION, { initialPending: true });
   // Instancia aparte para escribir: su isPending no debe mostrar el skeleton de la lista.
   const accountsWriter = useCollection<Account>(ACCOUNTS_COLLECTION);
 

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   annualProjection,
@@ -9,9 +9,12 @@ import {
   sortEntries,
   type EntrySortKey,
   type SortDirection,
+  type TransactionType,
 } from "@/domain";
 import { ConfirmDialog } from "@/shared/components/ui/ConfirmDialog";
 import { Skeleton } from "@/shared/components/shadcn/skeleton";
+import { LoadingRegion } from "@/shared/components/ui/loading/LoadingRegion";
+import { SkeletonText } from "@/shared/components/ui/loading/SkeletonText";
 import { useItem } from "../hooks/useItem";
 import { useUserEntries } from "../hooks/useUserEntries";
 import { useAllItems } from "../hooks/useAllItems";
@@ -29,20 +32,22 @@ import { toDomainItem } from "../mappers";
 import { EntryHistory, EntryHistorySkeleton } from "../components/EntryHistory";
 import { ItemStats, ItemStatsSkeleton } from "../components/ItemStats";
 import { FrequencyBadge } from "../components/FrequencyBadge";
+import { ItemComparisonChartSkeleton } from "../components/ItemComparisonChartSkeleton";
 
 // Recharts se carga solo cuando se abre un detalle (no penaliza la carga inicial)
 const ItemComparisonChart = lazy(() => import("../components/ItemComparisonChart"));
 
-const ChartSkeleton = () => (
-  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-    <Skeleton className="h-72 rounded-2xl" />
-    <Skeleton className="h-72 rounded-2xl" />
-  </div>
-);
+const pageClass = "mx-auto flex w-full max-w-4xl flex-col gap-6 p-6";
+const headerClass = "flex flex-col gap-2";
+const titleRowClass = "flex flex-wrap items-center justify-between gap-3";
+const titleGroupClass = "flex flex-wrap items-center gap-3";
+const titleTextClass = "text-3xl";
+const ACTION_BUTTON_COUNT = 2;
 
 // HU-12: detalle de un gasto/ingreso con indicadores e historial ordenable.
 export function ItemDetailPage() {
   const { id: itemId = "" } = useParams();
+  const { pathname } = useLocation();
   const { getUserId } = useAuth();
   const uid = getUserId()!;
 
@@ -123,14 +128,29 @@ export function ItemDetailPage() {
   };
 
   if (loadingItem) {
+    // Antes de tener el concepto, la ruta indica si es gasto (con gráfica) o ingreso.
+    const expectedType: TransactionType = pathname.startsWith("/ingresos") ? "income" : "expense";
+
     return (
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-6" aria-busy="true">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-9 w-64" />
-        <ItemStatsSkeleton />
-        <ChartSkeleton />
+      <LoadingRegion className={pageClass} label="Cargando detalle">
+        <div className={headerClass}>
+          <SkeletonText className="text-sm" barClassName="w-20" />
+          <div className={titleRowClass}>
+            <div className={titleGroupClass}>
+              <SkeletonText className={titleTextClass} barClassName="w-56" />
+              <Skeleton className="h-6 w-20 rounded-full" />
+            </div>
+            <div className="flex gap-2">
+              {Array.from({ length: ACTION_BUTTON_COUNT }, (_, index) => (
+                <Skeleton key={index} className="h-8 w-24 rounded-lg" />
+              ))}
+            </div>
+          </div>
+        </div>
+        <ItemStatsSkeleton type={expectedType} />
+        {expectedType === "expense" && <ItemComparisonChartSkeleton />}
         <EntryHistorySkeleton />
-      </div>
+      </LoadingRegion>
     );
   }
 
@@ -148,15 +168,15 @@ export function ItemDetailPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-6">
-      <div className="flex flex-col gap-2">
+    <div className={pageClass}>
+      <div className={headerClass}>
         <Link to={listPath} className="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <i className="ri-arrow-left-line" aria-hidden="true" />
           {item.type === "income" ? "Ingresos" : "Gastos"}
         </Link>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-bold text-foreground">{item.name}</h1>
+        <div className={titleRowClass}>
+          <div className={titleGroupClass}>
+            <h1 className={`${titleTextClass} font-bold text-foreground`}>{item.name}</h1>
             <FrequencyBadge frequency={item.frequency} />
           </div>
           <div className="flex gap-2">
@@ -178,7 +198,7 @@ export function ItemDetailPage() {
       </div>
 
       {loadingEntries || !indicators ? (
-        <ItemStatsSkeleton />
+        <ItemStatsSkeleton type={item.type} />
       ) : (
         <ItemStats
           type={item.type}
@@ -190,9 +210,9 @@ export function ItemDetailPage() {
 
       {item.type === "expense" &&
         (loadingEntries || !indicators ? (
-          <ChartSkeleton />
+          <ItemComparisonChartSkeleton />
         ) : (
-          <Suspense fallback={<ChartSkeleton />}>
+          <Suspense fallback={<ItemComparisonChartSkeleton />}>
             <ItemComparisonChart itemName={item.name} stats={indicators.stats} />
           </Suspense>
         ))}

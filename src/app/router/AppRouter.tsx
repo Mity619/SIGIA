@@ -17,20 +17,12 @@ import { ItemDetailPage } from "@/features/items/pages/ItemDetailPage";
 import { TagsPage } from "@/features/tags/pages/TagsPage";
 import { SavingsPage } from "@/features/savings/pages/SavingsPage";
 
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { PageLoader } from "@/shared/components/ui/sections/PageLoader";
 import { GuestOnlyRoute } from "./GuestOnlyRoute";
 import { PrivateRoute } from "./PrivateRoute";
 import { AppLayout } from "@/shared/components/layout/AppLayout";
 
+// * Las rutas públicas se pintan de inmediato; los guards esperan la sesión con su skeleton.
 export const AppRouter = () => {
-  // * Esperar a que se compruebe si hay una sesión activa en toda la app.
-  const { loading } = useAuth();
-
-  if (loading) {
-    return <PageLoader />;
-  }
-
   return (
     <Routes>
       {/* Rutas Públicas */}

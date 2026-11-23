@@ -1,6 +1,8 @@
 
 import type { ChecklistFrequency } from "@/domain/period";
 import type { SavingsSummary } from "@/domain/savings";
+import { LoadingRegion } from "@/shared/components/ui/loading/LoadingRegion";
+import { SkeletonText } from "@/shared/components/ui/loading/SkeletonText";
 import { formatCurrency, formatDate } from "@/shared/utils/format";
 
 interface PeriodSummary {
@@ -16,6 +18,52 @@ interface SavingsOverviewProps {
   year: number;
 }
 
+const sectionTitleTextClass = "text-xl";
+const tilesGridClass = "grid gap-4 sm:grid-cols-2";
+const cardClass = "rounded-xl border border-border bg-card p-5 shadow-sm";
+const tileValueTextClass = "mt-2 text-2xl";
+const tileHintTextClass = "mt-2 text-xs";
+const breakdownRowClass = "flex items-center justify-between gap-4 py-4";
+const BREAKDOWN_SKELETON_ROWS = 3;
+
+/** Misma forma que SavingsOverview: totales por periodo y desglose anual. */
+export function SavingsOverviewSkeleton({ periodCount }: { periodCount: number }) {
+  return (
+    <LoadingRegion className="space-y-6" label="Cargando ahorros">
+      <div>
+        <SkeletonText className={`mb-4 ${sectionTitleTextClass}`} barClassName="w-52" />
+        <div className={tilesGridClass}>
+          {Array.from({ length: periodCount }, (_, index) => (
+            <div key={index} className={cardClass}>
+              <SkeletonText className="text-sm" barClassName="w-28" />
+              <SkeletonText className={tileValueTextClass} barClassName="w-32" />
+              <SkeletonText className={tileHintTextClass} barClassName="w-40" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className={cardClass}>
+        <div className="mb-5">
+          <SkeletonText className={sectionTitleTextClass} barClassName="w-48" />
+          <SkeletonText className="mt-1 text-sm" barClassName="w-56" />
+        </div>
+        <div className="divide-y divide-border">
+          {Array.from({ length: BREAKDOWN_SKELETON_ROWS }, (_, index) => (
+            <div key={index} className={breakdownRowClass}>
+              <div className="min-w-0">
+                <SkeletonText className="font-medium" barClassName="w-32" />
+                <SkeletonText className="text-sm" barClassName="w-24" />
+              </div>
+              <SkeletonText className="shrink-0 font-semibold" barClassName="w-24" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </LoadingRegion>
+  );
+}
+
 export function SavingsOverview({
   summaries,
   annualSummary,
@@ -26,25 +74,25 @@ export function SavingsOverview({
     <>
       {/* Totales por periodo */}
       <section>
-        <h2 className="mb-4 text-xl font-semibold text-foreground">
+        <h2 className={`mb-4 ${sectionTitleTextClass} font-semibold text-foreground`}>
           Resumen de ahorros
         </h2>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className={tilesGridClass}>
           {summaries.map((item) => (
             <div
               key={item.frequency}
-              className="rounded-xl border border-border bg-card p-5 shadow-sm"
+              className={cardClass}
             >
               <p className="text-sm text-muted-foreground">
                 Ahorro {item.label.toLowerCase()}
               </p>
 
-              <p className="mt-2 text-2xl font-bold text-foreground">
+              <p className={`${tileValueTextClass} font-bold text-foreground`}>
                 {formatCurrency(item.summary.total)}
               </p>
 
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className={`${tileHintTextClass} text-muted-foreground`}>
                 {item.frequency === "daily"
                   ? formatDate(referenceDate, "short")
                   : item.frequency === "weekly"
@@ -59,9 +107,9 @@ export function SavingsOverview({
       </section>
 
       {/* Desglose anual de gastos evitados */}
-      <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <section className={cardClass}>
         <div className="mb-5">
-          <h2 className="text-xl font-semibold text-foreground">
+          <h2 className={`${sectionTitleTextClass} font-semibold text-foreground`}>
             Desglose de ahorros
           </h2>
 
@@ -82,7 +130,7 @@ export function SavingsOverview({
             {annualSummary.details.map((item) => (
               <div
                 key={item.itemId}
-                className="flex items-center justify-between gap-4 py-4"
+                className={breakdownRowClass}
               >
                 <div className="min-w-0">
                   <p className="font-medium text-foreground">

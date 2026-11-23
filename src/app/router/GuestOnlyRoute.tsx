@@ -4,8 +4,12 @@
 
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { AuthFormSkeleton } from "@/features/auth/components/AuthForm";
 
 export const GuestOnlyRoute = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) return <AuthFormSkeleton />;
+
   return user ? <Navigate to="/dashboard" /> : <Outlet />;
 };

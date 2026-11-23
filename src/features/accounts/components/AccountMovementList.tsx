@@ -28,9 +28,14 @@ const MOVEMENT_STYLES: Record<
   },
 };
 
+export const movementSectionClass = "flex flex-col gap-4";
+export const movementTitleClass = "text-lg font-semibold text-foreground";
+export const movementListClass = "flex flex-col gap-3";
+export const movementRowClass = "flex items-center gap-3 rounded-xl border border-border bg-card p-3";
+
 export const AccountMovementList = ({ movements }: Props) => (
-  <section className="flex flex-col gap-4" aria-labelledby="account-movements">
-    <h2 id="account-movements" className="text-lg font-semibold text-foreground">
+  <section className={movementSectionClass} aria-labelledby="account-movements">
+    <h2 id="account-movements" className={movementTitleClass}>
       Movimientos
     </h2>
 
@@ -39,14 +44,11 @@ export const AccountMovementList = ({ movements }: Props) => (
         Esta cuenta aún no tiene movimientos.
       </p>
     ) : (
-      <ul className="flex flex-col gap-3">
+      <ul className={movementListClass}>
         {movements.map((movement) => {
           const style = MOVEMENT_STYLES[movement.type];
           return (
-            <li
-              key={movement.id}
-              className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
-            >
+            <li key={movement.id} className={movementRowClass}>
               <span
                 className={cn(
                   "flex size-10 shrink-0 items-center justify-center rounded-full",

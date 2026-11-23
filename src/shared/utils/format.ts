@@ -59,5 +59,18 @@ const compactCurrency = new Intl.NumberFormat("es-CO", {
 /** Fecha corta sin año, para ejes de gráficas (p. ej. "14 nov"). */
 export const formatDayMonth = (date: Date): string => dayMonth.format(date);
 
+const monthYear = {
+  short: new Intl.DateTimeFormat("es-CO", { month: "short", year: "2-digit" }),
+  long: new Intl.DateTimeFormat("es-CO", { month: "long", year: "numeric" }),
+};
+
+/** Mes y año sin conectores (p. ej. "nov 26" o "noviembre 2026"), para ejes y leyendas. */
+export const formatMonthYear = (date: Date, style: "long" | "short" = "long"): string =>
+  monthYear[style]
+    .formatToParts(date)
+    .filter((part) => part.type === "month" || part.type === "year")
+    .map((part) => part.value)
+    .join(" ");
+
 /** Moneda abreviada para ejes de gráficas (p. ej. "$ 1,2 M"). */
 export const formatCompactCurrency = (amount: number): string => compactCurrency.format(amount);

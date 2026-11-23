@@ -5,6 +5,8 @@ import {
 } from "@/domain/savingsGoals";
 
 import { Button } from "@/shared/components/shadcn/button";
+import { Skeleton } from "@/shared/components/shadcn/skeleton";
+import { SkeletonText } from "@/shared/components/ui/loading/SkeletonText";
 import { formatCurrency, formatDate } from "@/shared/utils/format";
 
 interface SavingsGoalCardProps {
@@ -28,6 +30,38 @@ const GOAL_STATUS_STYLES = {
   failed: "bg-red-100 text-red-800",
 } as const;
 
+const cardClass = "space-y-4 rounded-xl border border-border bg-card p-5 shadow-sm";
+const headerClass = "flex flex-wrap items-start justify-between gap-2";
+const amountTextClass = "text-xl";
+const progressTrackClass = "h-3 overflow-hidden rounded-full";
+const progressInfoClass = "flex flex-wrap justify-between gap-2 text-sm";
+const deadlineClass = "border-t border-border pt-3";
+
+/** Misma forma que SavingsGoalCard en su caso más común: meta pendiente sin aportes. */
+export function SavingsGoalCardSkeleton() {
+  return (
+    <div className={cardClass}>
+      <div className={headerClass}>
+        <SkeletonText className="font-semibold" barClassName="w-32" />
+        <Skeleton className="h-6 w-20 rounded-full" />
+      </div>
+      <div className="space-y-1">
+        <SkeletonText className={amountTextClass} barClassName="w-28" />
+        <SkeletonText className="text-sm" barClassName="w-24" />
+      </div>
+      <Skeleton className={progressTrackClass} />
+      <div className={progressInfoClass}>
+        <SkeletonText barClassName="w-28" />
+        <SkeletonText barClassName="w-24" />
+      </div>
+      <div className={deadlineClass}>
+        <SkeletonText className="text-sm" barClassName="w-40" />
+      </div>
+      <Skeleton className="h-8 w-full rounded-lg" />
+    </div>
+  );
+}
+
 export function SavingsGoalCard({
   goal,
   availableSavings,
@@ -39,9 +73,9 @@ export function SavingsGoalCard({
   const progress = calculateGoalProgress(goal);
 
   return (
-    <div className="space-y-4 rounded-xl border border-border bg-card p-5 shadow-sm">
+    <div className={cardClass}>
       {/* Nombre y estado */}
-      <div className="flex flex-wrap items-start justify-between gap-2">
+      <div className={headerClass}>
         <h3 className="font-semibold text-foreground">
           {goal.name}
         </h3>
@@ -57,7 +91,7 @@ export function SavingsGoalCard({
 
       {/* Monto asignado y objetivo */}
       <div className="space-y-1">
-        <p className="text-xl font-bold text-foreground">
+        <p className={`${amountTextClass} font-bold text-foreground`}>
           {formatCurrency(goal.savedAmount)}
         </p>
 
@@ -68,7 +102,7 @@ export function SavingsGoalCard({
 
       {/* Barra de progreso */}
       <div
-        className="h-3 overflow-hidden rounded-full bg-muted"
+        className={`${progressTrackClass} bg-muted`}
         role="progressbar"
         aria-label={`Progreso de ${goal.name}`}
         aria-valuenow={progress.percentage}
@@ -84,7 +118,7 @@ export function SavingsGoalCard({
       </div>
 
       {/* Porcentaje y dinero restante */}
-      <div className="flex flex-wrap justify-between gap-2 text-sm">
+      <div className={progressInfoClass}>
         <span className="font-medium text-foreground">
           {progress.percentage.toLocaleString("es-CO", {
             maximumFractionDigits: 2,
@@ -100,7 +134,7 @@ export function SavingsGoalCard({
       </div>
 
       {/* Fecha límite */}
-      <div className="border-t border-border pt-3">
+      <div className={deadlineClass}>
         <p className="text-sm text-muted-foreground">
           Fecha límite: {formatDate(goal.deadline, "short")}
         </p>

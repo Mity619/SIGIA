@@ -11,6 +11,36 @@ import { normalizeText } from "@/domain";
 import type { GroupDoc } from "../types/tags.types";
 import type { GroupSchema } from "../schemas/group.schema";
 import { useSnackbar } from "notistack";
+import { Skeleton } from "@/shared/components/shadcn/skeleton";
+import { LoadingRegion } from "@/shared/components/ui/loading/LoadingRegion";
+import { SkeletonText } from "@/shared/components/ui/loading/SkeletonText";
+
+const groupListClass = "flex flex-col gap-2";
+const groupRowClass = "flex items-center justify-between rounded-lg border p-3";
+const groupNameClass = "flex items-center gap-2";
+const groupIconTextClass = "text-xl";
+const groupActionsClass = "flex items-center gap-2";
+// Editar y eliminar.
+const GROUP_ACTION_COUNT = 2;
+const GROUP_SKELETON_ROWS = 3;
+
+const GroupListSkeleton = () => (
+  <LoadingRegion className={groupListClass} label="Cargando grupos">
+    {Array.from({ length: GROUP_SKELETON_ROWS }, (_, index) => (
+      <div key={index} className={`${groupRowClass} bg-card`}>
+        <div className={groupNameClass}>
+          <SkeletonText className={groupIconTextClass} barClassName="w-5" />
+          <SkeletonText barClassName="w-28" />
+        </div>
+        <div className={groupActionsClass}>
+          {Array.from({ length: GROUP_ACTION_COUNT }, (_, actionIndex) => (
+            <Skeleton key={actionIndex} className="size-11 rounded-lg" />
+          ))}
+        </div>
+      </div>
+    ))}
+  </LoadingRegion>
+);
 
 export function TagsPage() {
   const { getUserId } = useAuth();
@@ -80,17 +110,17 @@ export function TagsPage() {
         {/* Lista de Grupos */}
         <div>
           <h2 className="text-lg font-semibold mb-4">Mis grupos</h2>
-          {loading ? <p>Cargando...</p> : (
-            <div className="flex flex-col gap-2">
+          {loading ? <GroupListSkeleton /> : (
+            <div className={groupListClass}>
               {groups.map(g => (
-                <div key={g.id} className="flex items-center justify-between rounded-lg border p-3 bg-white">
-                  <div className="flex items-center gap-2">
-                    <i className={`${g.iconKey} text-xl`} aria-hidden="true" />
+                <div key={g.id} className={`${groupRowClass} bg-white`}>
+                  <div className={groupNameClass}>
+                    <i className={`${g.iconKey} ${groupIconTextClass}`} aria-hidden="true" />
                     <span>{g.name}</span>
                   </div>
 
                   {/* Botones de acción */}
-                  <div className="flex items-center gap-2">
+                  <div className={groupActionsClass}>
                     <button
                       type="button"
                       onClick={() => setGroupToEdit(g)}

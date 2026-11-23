@@ -8,7 +8,7 @@ import { toDomainEntry } from "../mappers";
  * Se filtran y agregan en memoria con las funciones de src/domain (HU-11, HU-12, HU-13).
  */
 export function useUserEntries(uid: string) {
-  const col = useCollection<EntryDoc>(`users/${uid}/entries`);
+  const col = useCollection<EntryDoc>(`users/${uid}/entries`, { initialPending: true });
 
   useEffect(() => {
     const unsubscribe = col.suscribe([]);

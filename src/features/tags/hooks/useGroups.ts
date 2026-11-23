@@ -6,7 +6,7 @@ const byName = (a: GroupDoc, b: GroupDoc) => a.name.localeCompare(b.name, 'es', 
 
 /** Grupos del usuario en tiempo real, ordenados alfabéticamente. */
 export function useGroups(uid: string) {
-  const col = useCollection<GroupDoc>(`users/${uid}/groups`);
+  const col = useCollection<GroupDoc>(`users/${uid}/groups`, { initialPending: true });
   useEffect(() => {
     const unsubscribe = col.suscribe([]);
     return unsubscribe;

@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared/components/shadcn/button";
 import { Skeleton } from "@/shared/components/shadcn/skeleton";
+import { LoadingRegion } from "@/shared/components/ui/loading/LoadingRegion";
+import { SkeletonText } from "@/shared/components/ui/loading/SkeletonText";
 import { getAccountDetailPath } from "../constants/account.constants";
 import type { AccountDoc } from "../types/account.types";
 import { canDeleteAccount } from "../utils/accountRules";
@@ -23,15 +25,15 @@ interface Props {
 }
 
 const AccountListSkeleton = () => (
-  <ul className={listClass} aria-busy="true" aria-label="Cargando cuentas">
+  <LoadingRegion className={listClass} label="Cargando cuentas">
     {Array.from({ length: SKELETON_ROWS }, (_, index) => (
-      <li key={index} className={rowClass}>
+      <div key={index} className={rowClass}>
         <Skeleton className="size-10 shrink-0 rounded-full" />
-        <Skeleton className="h-4 w-32" />
-        <Skeleton className="ml-auto h-6 w-24 rounded-full" />
-      </li>
+        <SkeletonText className="min-w-0 flex-1 font-medium" barClassName="w-32" />
+        <Skeleton className="h-6 w-24 shrink-0 rounded-full" />
+      </div>
     ))}
-  </ul>
+  </LoadingRegion>
 );
 
 const AccountListError = () => (

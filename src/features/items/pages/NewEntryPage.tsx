@@ -4,7 +4,7 @@ import { useItems } from "../hooks/useItems";
 import { useGroups } from "@/features/tags/hooks/useGroups";
 import { useAccount } from "@/features/accounts/hooks/useAccount";
 import { useCreateEntry } from "../hooks/useCreateEntry";
-import { EntryForm } from "../components/EntryForm";
+import { EntryForm, EntryFormSkeleton } from "../components/EntryForm";
 import type { TransactionType } from "../types/items.types";
 import { useNavigate } from "react-router-dom";
 
@@ -13,9 +13,11 @@ export function NewEntryPage({ type }: { type: TransactionType }) {
   const uid = getUserId()!;
   const navigate = useNavigate();
 
-  const { items } = useItems(uid, type);
-  const { groups } = useGroups(uid);
-  const { accounts } = useAccount(); // 👈 Traemos las cuentas
+  const { items, loading: loadingItems } = useItems(uid, type);
+  const { groups, loading: loadingGroups } = useGroups(uid);
+  const { accounts, loadingAccounts } = useAccount(); // 👈 Traemos las cuentas
+  // El formulario toma sus valores por defecto (ej. la cuenta) al montarse: se espera a los datos.
+  const isLoadingOptions = loadingItems || loadingGroups || loadingAccounts;
 
   const { submit, saving } = useCreateEntry(uid);
 
@@ -43,14 +45,18 @@ export function NewEntryPage({ type }: { type: TransactionType }) {
           Nuevo {type === 'expense' ? 'Gasto' : 'Ingreso'}
         </h1>
         
-        <EntryForm
-          type={type}
-          items={items}
-          groups={groups}
-          accounts={accounts}
-          onSubmit={handleSubmit}
-          saving={saving}
-        />
+        {isLoadingOptions ? (
+          <EntryFormSkeleton />
+        ) : (
+          <EntryForm
+            type={type}
+            items={items}
+            groups={groups}
+            accounts={accounts}
+            onSubmit={handleSubmit}
+            saving={saving}
+          />
+        )}
       </div>
     </div>
   );

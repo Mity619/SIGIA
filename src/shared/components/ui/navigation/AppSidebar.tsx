@@ -13,7 +13,11 @@ import {
 } from "@/shared/components/shadcn/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "../../shadcn/button";
-import { ProfilePhoto } from "../user/ProfilePhoto";
+import { Skeleton } from "../../shadcn/skeleton";
+import { SkeletonText } from "../loading/SkeletonText";
+import { PROFILE_PHOTO_SIZE_CLASS, ProfilePhoto } from "../user/ProfilePhoto";
+
+const userCardClass = "flex items-center gap-3 rounded-2xl bg-gray-50 p-2.5";
 
 type IItem = {
   title: string;
@@ -57,7 +61,7 @@ const items: IItem[] = [
 
 export function AppSidebar() {
   //* Context
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const { pathname } = useLocation();
 
   return (
@@ -108,20 +112,28 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="bg-white p-3">
-        <div className="flex items-center gap-3 rounded-2xl bg-gray-50 p-2.5">
-          <ProfilePhoto />
-          <span className="min-w-0 flex-1 truncate text-sm font-medium text-[#200020]">
-            {user?.username?.split(" ").slice(0, 2).join(" ") ?? "Usuario"}
-          </span>
-          <Button
-            onClick={logout}
-            aria-label="Cerrar sesión"
-            title="Cerrar sesión"
-            className="size-9 shrink-0 rounded-xl bg-[#da00831f] text-[#DA0081] shadow-none transition-colors hover:bg-[#E366A7] hover:text-white"
-          >
-            <i className="ri-logout-box-r-line text-lg" aria-hidden="true" />
-          </Button>
-        </div>
+        {loading ? (
+          <div className={userCardClass} aria-busy="true">
+            <Skeleton className={`${PROFILE_PHOTO_SIZE_CLASS} shrink-0 rounded-full`} />
+            <SkeletonText className="min-w-0 flex-1 text-sm" barClassName="w-24" />
+            <Skeleton className="size-9 shrink-0 rounded-xl" />
+          </div>
+        ) : (
+          <div className={userCardClass}>
+            <ProfilePhoto />
+            <span className="min-w-0 flex-1 truncate text-sm font-medium text-[#200020]">
+              {user?.username?.split(" ").slice(0, 2).join(" ") ?? "Usuario"}
+            </span>
+            <Button
+              onClick={logout}
+              aria-label="Cerrar sesión"
+              title="Cerrar sesión"
+              className="size-9 shrink-0 rounded-xl bg-[#da00831f] text-[#DA0081] shadow-none transition-colors hover:bg-[#E366A7] hover:text-white"
+            >
+              <i className="ri-logout-box-r-line text-lg" aria-hidden="true" />
+            </Button>
+          </div>
+        )}
       </SidebarFooter>
     </Sidebar>
   );

@@ -3,7 +3,7 @@ import { useCollection } from '@/firebase/hooks/useCollection';
 import type { ItemDoc, TransactionType } from '../types/items.types';
 
 export function useItems(uid: string, type: TransactionType) {
-  const col = useCollection<ItemDoc>(`users/${uid}/items`);
+  const col = useCollection<ItemDoc>(`users/${uid}/items`, { initialPending: true });
 
   useEffect(() => {
     // Filtros combinados: type + no archivados
