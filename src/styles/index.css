@@ -1,0 +1,232 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource/poppins/300.css";
+@import "@fontsource/poppins/400.css";
+@import "@fontsource/poppins/500.css";
+@import "@fontsource/poppins/600.css";
+@import "@fontsource/poppins/700.css";
+@import "@fontsource/poppins/300-italic.css";
+@import "@fontsource/poppins/400-italic.css";
+@import "@fontsource/poppins/500-italic.css";
+@import "@fontsource/poppins/600-italic.css";
+@import "@fontsource/poppins/700-italic.css";
+@import "remixicon/fonts/remixicon.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ==========================================================================
+   1. Paleta base Nequi (única fuente de verdad de los colores de marca)
+   ========================================================================== */
+:root {
+  --uva: #200020;
+  --blanco: #ffffff;
+  --orquidea: #da0081;
+  --orquidea-70: #e366a7;
+  --orquidea-50: #e992be;
+  --orquidea-30: #f1bfda;
+  --guanabana: #ece7f5;
+  --caribe: #5a9efb;
+  --naranja: #dc410f;
+}
+
+/* ==========================================================================
+   2. Tokens semánticos - modo claro
+   ========================================================================== */
+:root {
+  --sans: "Poppins", "Segoe UI", Roboto, sans-serif;
+  --heading: "Poppins", "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+
+  --background: var(--blanco);
+  --foreground: var(--uva);
+
+  --card: var(--blanco);
+  --card-foreground: var(--uva);
+
+  --popover: var(--blanco);
+  --popover-foreground: var(--uva);
+
+  --primary: var(--orquidea);
+  --primary-foreground: var(--blanco);
+
+  --secondary: var(--guanabana);
+  --secondary-foreground: var(--uva);
+
+  --muted: var(--guanabana);
+  --muted-foreground: color-mix(in oklab, var(--uva) 65%, var(--blanco));
+
+  --accent: var(--guanabana);
+  --accent-foreground: var(--uva);
+
+  --destructive: var(--naranja);
+
+  --border: color-mix(in oklab, var(--uva) 12%, var(--blanco));
+  --input: color-mix(in oklab, var(--uva) 18%, var(--blanco));
+  --ring: var(--orquidea-70);
+
+  --chart-1: var(--orquidea);
+  --chart-2: var(--caribe);
+  --chart-3: var(--naranja);
+  --chart-4: var(--orquidea-50);
+  --chart-5: var(--uva);
+
+  --radius: 0.45rem;
+
+  --sidebar: color-mix(in oklab, var(--guanabana) 50%, var(--blanco));
+  --sidebar-foreground: var(--uva);
+  --sidebar-primary: var(--orquidea);
+  --sidebar-primary-foreground: var(--blanco);
+  --sidebar-accent: var(--guanabana);
+  --sidebar-accent-foreground: var(--uva);
+  --sidebar-border: color-mix(in oklab, var(--uva) 12%, var(--blanco));
+  --sidebar-ring: var(--orquidea-70);
+}
+
+/* ==========================================================================
+   3. Tokens semánticos - modo oscuro
+   ========================================================================== */
+.dark {
+  color-scheme: dark;
+
+  --background: var(--uva);
+  --foreground: var(--blanco);
+
+  --card: color-mix(in oklab, var(--uva) 90%, var(--blanco));
+  --card-foreground: var(--blanco);
+
+  --popover: color-mix(in oklab, var(--uva) 90%, var(--blanco));
+  --popover-foreground: var(--blanco);
+
+  --primary: var(--orquidea);
+  --primary-foreground: var(--blanco);
+
+  --secondary: color-mix(in oklab, var(--uva) 80%, var(--blanco));
+  --secondary-foreground: var(--blanco);
+
+  --muted: color-mix(in oklab, var(--uva) 80%, var(--blanco));
+  --muted-foreground: var(--orquidea-30);
+
+  --accent: color-mix(in oklab, var(--uva) 80%, var(--blanco));
+  --accent-foreground: var(--blanco);
+
+  --destructive: var(--naranja);
+
+  --border: color-mix(in oklab, var(--blanco) 14%, transparent);
+  --input: color-mix(in oklab, var(--blanco) 20%, transparent);
+  --ring: var(--orquidea-70);
+
+  --chart-1: var(--orquidea-70);
+  --chart-2: var(--caribe);
+  --chart-3: var(--naranja);
+  --chart-4: var(--orquidea-30);
+  --chart-5: var(--guanabana);
+
+  --sidebar: color-mix(in oklab, var(--uva) 90%, var(--blanco));
+  --sidebar-foreground: var(--blanco);
+  --sidebar-primary: var(--orquidea);
+  --sidebar-primary-foreground: var(--blanco);
+  --sidebar-accent: color-mix(in oklab, var(--uva) 80%, var(--blanco));
+  --sidebar-accent-foreground: var(--blanco);
+  --sidebar-border: color-mix(in oklab, var(--blanco) 14%, transparent);
+  --sidebar-ring: var(--orquidea-70);
+}
+
+/* ==========================================================================
+   4. Exposición de tokens a Tailwind (bg-primary, text-muted-foreground...)
+   ========================================================================== */
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: "Poppins", sans-serif;
+
+  /* Paleta de marca: bg-uva, text-orquidea, border-caribe, etc. */
+  --color-uva: var(--uva);
+  --color-blanco: var(--blanco);
+  --color-orquidea: var(--orquidea);
+  --color-orquidea-70: var(--orquidea-70);
+  --color-orquidea-50: var(--orquidea-50);
+  --color-orquidea-30: var(--orquidea-30);
+  --color-guanabana: var(--guanabana);
+  --color-caribe: var(--caribe);
+  --color-naranja: var(--naranja);
+
+  /* Tokens semánticos */
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* ==========================================================================
+   5. Base
+   ========================================================================== */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    @apply font-sans;
+  }
+}
+
+/* Autocompletado del navegador: usa los tokens para respetar claro/oscuro */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--background) inset !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
