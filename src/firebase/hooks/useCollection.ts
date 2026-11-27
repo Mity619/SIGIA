@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@/shared/errors/errorCatalog";
 import { useState } from "react";
 import { db } from "../config";
 import {
@@ -70,17 +71,17 @@ export const useCollection = <T>(
           setResults(docs);
           setIsPending(false);
         },
-        () => {
-          setError(`Error al suscribirse a ${table}`);
+        (err) => {
+          console.error(`[useCollection] ${table}`, err);
+          setError(getErrorMessage(err));
           setIsPending(false);
         },
       );
 
       return unsubscribe;
-    } catch {
-      setError(
-        `Error al consultar los registros solicitados de la colección ${table}`,
-      );
+    } catch (err) {
+      console.error(`[useCollection] ${table}`, err);
+      setError(getErrorMessage(err));
       setIsPending(false);
       return () => {};
     }
@@ -105,8 +106,9 @@ export const useCollection = <T>(
 
         setIsPending(false);
       },
-      () => {
-        setError(`Error al suscribirse al documento ${table}/${id}`);
+      (err) => {
+        console.error(`[useCollection] ${table}`, err);
+        setError(getErrorMessage(err));
         setIsPending(false);
       },
     );
@@ -135,11 +137,10 @@ export const useCollection = <T>(
         setIsPending(false);
         return null;
       }
-    } catch {
+    } catch (err) {
       setIsPending(false);
-      setError(
-        `Error al obtener el registro solcitado de la colección ${table}`,
-      );
+      console.error(`[useCollection] ${table}`, err);
+      setError(getErrorMessage(err));
       return null;
     }
   };
@@ -158,9 +159,10 @@ export const useCollection = <T>(
 
       setIsPending(false);
       return ref.id; // Retornar el id del documento creado
-    } catch {
+    } catch (err) {
       setIsPending(false);
-      setError(`Error al agregar un nuevo registro en la colección ${table}`);
+      console.error(`[useCollection] ${table}`, err);
+      setError(getErrorMessage(err));
       return null;
     }
   };
@@ -180,8 +182,9 @@ export const useCollection = <T>(
 
       setIsPending(false);
       return true;
-    } catch {
-      setError(`Error al crear el documento en ${table} con id ${id}`);
+    } catch (err) {
+      console.error(`[useCollection] ${table}`, err);
+      setError(getErrorMessage(err));
       setIsPending(false);
       return false;
     }
@@ -203,11 +206,10 @@ export const useCollection = <T>(
 
       setIsPending(false);
       return true;
-    } catch {
+    } catch (err) {
       setIsPending(false);
-      setError(
-        `Error al actualizar el registro solicitado de la colección ${table}`,
-      );
+      console.error(`[useCollection] ${table}`, err);
+      setError(getErrorMessage(err));
       return false;
     }
   };
@@ -221,10 +223,9 @@ export const useCollection = <T>(
       await deleteDoc(doc(db, table, id));
       setIsPending(false);
       return true;
-    } catch {
-      setError(
-        `Error al eliminar el registro solicitado de la colección ${table}`,
-      );
+    } catch (err) {
+      console.error(`[useCollection] ${table}`, err);
+      setError(getErrorMessage(err));
       setIsPending(false);
       return false;
     }

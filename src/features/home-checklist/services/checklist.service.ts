@@ -1,3 +1,4 @@
+import { UserError } from "@/domain/errors";
 import {
   collection,
   doc,
@@ -66,20 +67,20 @@ export async function saveChecklist(
   } = input;
 
   if (!uid || auth.currentUser?.uid !== uid) {
-    throw new Error("Usuario no autenticado.");
+    throw new UserError("Usuario no autenticado.");
   }
 
   if (!accountId) {
-    throw new Error("Selecciona una cuenta.");
+    throw new UserError("Selecciona una cuenta.");
   }
 
   if (Number.isNaN(date.getTime())) {
-    throw new Error("La fecha no es válida.");
+    throw new UserError("La fecha no es válida.");
   }
 
   const { from, to } = checklistPeriodRange(frequency, date);
   if (to.getTime() > Date.now()) {
-    throw new Error(
+    throw new UserError(
       "No puedes guardar la checklist hasta que termine el periodo.",
     );
   }
@@ -98,11 +99,11 @@ export async function saveChecklist(
     itemIds.some((id) => !id) ||
     new Set(itemIds).size !== itemIds.length
   ) {
-    throw new Error("La lista contiene gastos inválidos o repetidos.");
+    throw new UserError("La lista contiene gastos inválidos o repetidos.");
   }
 
   if (selectedItems.length === 0) {
-    throw new Error("No hay gastos para este periodo.");
+    throw new UserError("No hay gastos para este periodo.");
   }
 
   const checked = new Set(checkedIds);
@@ -111,7 +112,7 @@ export async function saveChecklist(
     checked.size !== checkedIds.length ||
     [...checked].some((id) => !itemIds.includes(id))
   ) {
-    throw new Error("La selección contiene gastos inválidos.");
+    throw new UserError("La selección contiene gastos inválidos.");
   }
 
   // Consultar los movimientos que ya existen en el periodo.
@@ -143,7 +144,7 @@ export async function saveChecklist(
       !Number.isFinite(entry.amount) ||
       entry.amount <= 0
     ) {
-      throw new Error(
+      throw new UserError(
         "Uno de los movimientos existentes tiene un monto inválido.",
       );
     }
@@ -178,7 +179,7 @@ export async function saveChecklist(
       !accountSnapshot.exists() ||
       (accountSnapshot.data() as Account).user_id !== uid
     ) {
-      throw new Error("La cuenta seleccionada no es válida.");
+      throw new UserError("La cuenta seleccionada no es válida.");
     }
 
     const itemSnapshots = await Promise.all(
@@ -194,7 +195,7 @@ export async function saveChecklist(
 
     for (const snapshot of itemSnapshots) {
       if (!snapshot.exists()) {
-        throw new Error("Uno de los gastos ya no existe.");
+        throw new UserError("Uno de los gastos ya no existe.");
       }
 
       const item = snapshot.data() as ItemDoc;
@@ -206,7 +207,7 @@ export async function saveChecklist(
         !Number.isFinite(item.lastAmount) ||
         item.lastAmount <= 0
       ) {
-        throw new Error("Uno de los gastos no es válido.");
+        throw new UserError("Uno de los gastos no es válido.");
       }
 
       const record: ChecklistItemRecord = {
@@ -293,11 +294,11 @@ export async function getChecklistPeriod(
   date: Date,
 ): Promise<(ChecklistPeriodDoc & { id: string }) | null> {
   if (!uid || auth.currentUser?.uid !== uid) {
-    throw new Error("Usuario no autenticado.");
+    throw new UserError("Usuario no autenticado.");
   }
 
   if (Number.isNaN(date.getTime())) {
-    throw new Error("La fecha no es válida.");
+    throw new UserError("La fecha no es válida.");
   }
 
   const periodId = getChecklistPeriodId(frequency, date);
@@ -326,11 +327,11 @@ export async function getRecordedChecklistItemIds(
   date: Date,
 ): Promise<string[]> {
   if (!uid || auth.currentUser?.uid !== uid) {
-    throw new Error("Usuario no autenticado.");
+    throw new UserError("Usuario no autenticado.");
   }
 
   if (Number.isNaN(date.getTime())) {
-    throw new Error("La fecha no es válida.");
+    throw new UserError("La fecha no es válida.");
   }
 
   const { from, to } = checklistPeriodRange(frequency, date);
@@ -364,11 +365,11 @@ export async function getSavingsPeriods(
   date: Date,
 ): Promise<SavingsPeriodRecord[]> {
   if (!uid || auth.currentUser?.uid !== uid) {
-    throw new Error("Usuario no autenticado.");
+    throw new UserError("Usuario no autenticado.");
   }
 
   if (Number.isNaN(date.getTime())) {
-    throw new Error("La fecha no es válida.");
+    throw new UserError("La fecha no es válida.");
   }
 
   const { from, to } = yearRange(date);

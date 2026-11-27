@@ -1,3 +1,4 @@
+import { UserError } from "@/domain/errors";
 import {
   collection,
   doc,
@@ -47,11 +48,11 @@ export async function allocateSavingsToGoal({
   amount,
 }: AllocateSavingsInput): Promise<AllocationResult> {
   if (!uid || auth.currentUser?.uid !== uid) {
-    throw new Error("Usuario no autenticado.");
+    throw new UserError("Usuario no autenticado.");
   }
 
   if (!goalId) {
-    throw new Error("Selecciona una meta válida.");
+    throw new UserError("Selecciona una meta válida.");
   }
 
   // Una consulta para recuperar el historial.
@@ -97,7 +98,7 @@ export async function allocateSavingsToGoal({
     );
 
     if (!goalSnapshot.exists()) {
-      throw new Error("La meta no existe.");
+      throw new UserError("La meta no existe.");
     }
 
     const goalData = goalSnapshot.data();
@@ -118,7 +119,7 @@ export async function allocateSavingsToGoal({
       !Number.isFinite(totalAssigned) ||
       totalAssigned < 0
     ) {
-      throw new Error("El saldo asignado no es válido.");
+      throw new UserError("El saldo asignado no es válido.");
     }
 
     const available = calculateAvailableSavings(
@@ -168,11 +169,11 @@ export async function reverseSavingsAllocation(
   amount: number,
 ): Promise<number> {
   if (!uid || auth.currentUser?.uid !== uid) {
-    throw new Error("Usuario no autenticado.");
+    throw new UserError("Usuario no autenticado.");
   }
 
   if (!goalId) {
-    throw new Error("Selecciona una meta válida.");
+    throw new UserError("Selecciona una meta válida.");
   }
 
   if (
@@ -181,7 +182,7 @@ export async function reverseSavingsAllocation(
     !Number.isSafeInteger(Math.round(amount * 100)) ||
     Math.abs(amount * 100 - Math.round(amount * 100)) >= 1e-7
   ) {
-    throw new Error("El monto a devolver no es válido.");
+    throw new UserError("El monto a devolver no es válido.");
   }
 
   const amountCents = toCents(amount);
@@ -201,11 +202,11 @@ export async function reverseSavingsAllocation(
     const allocationsSnapshot = await tx.get(allocationsRef);
 
     if (!goalSnapshot.exists()) {
-      throw new Error("La meta no existe.");
+      throw new UserError("La meta no existe.");
     }
 
     if (!allocationsSnapshot.exists()) {
-      throw new Error("No existen asignaciones para devolver.");
+      throw new UserError("No existen asignaciones para devolver.");
     }
 
     const savedAmount = goalSnapshot.data().savedAmount;
@@ -220,7 +221,7 @@ export async function reverseSavingsAllocation(
       savedAmount < 0 ||
       totalAssigned < 0
     ) {
-      throw new Error("Los saldos registrados no son válidos.");
+      throw new UserError("Los saldos registrados no son válidos.");
     }
 
     const savedCents = toCents(savedAmount);
@@ -230,17 +231,17 @@ export async function reverseSavingsAllocation(
       !Number.isSafeInteger(savedCents) ||
       !Number.isSafeInteger(assignedCents)
     ) {
-      throw new Error("Los saldos registrados no son válidos.");
+      throw new UserError("Los saldos registrados no son válidos.");
     }
 
     if (amountCents > savedCents) {
-      throw new Error(
+      throw new UserError(
         "No puedes devolver más de lo asignado a la meta.",
       );
     }
 
     if (amountCents > assignedCents) {
-      throw new Error(
+      throw new UserError(
         "El saldo compartido no permite esta devolución.",
       );
     }
@@ -270,7 +271,7 @@ export async function reverseSavingsAllocation(
  */
 export async function getAvailableSavingsForGoals(uid: string) {
   if (!uid || auth.currentUser?.uid !== uid) {
-    throw new Error("Usuario no autenticado.");
+    throw new UserError("Usuario no autenticado.");
   }
 
   const periodsRef = collection(db, `users/${uid}/checklist_periods`);
@@ -296,7 +297,7 @@ export async function getAvailableSavingsForGoals(uid: string) {
     : 0;
 
   if (!Number.isFinite(totalAssigned) || totalAssigned < 0) {
-    throw new Error("El saldo asignado no es válido.");
+    throw new UserError("El saldo asignado no es válido.");
   }
 
   return {

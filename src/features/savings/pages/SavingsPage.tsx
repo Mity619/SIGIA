@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useSnackbar } from "notistack";
+import { getErrorMessage } from "@/shared/errors/errorCatalog";
 
 import type { SavingsGoal } from "@/domain/savingsGoals";
 
@@ -316,7 +317,7 @@ export function SavingsPage() {
       calculateGoalAllocation(selectedAllocationGoal, amount, availableSavings);
     } catch (err) {
       enqueueSnackbar(
-        err instanceof Error ? err.message : "El aporte no es válido.",
+        getErrorMessage(err),
         { variant: "error" },
       );
       return;
@@ -348,7 +349,7 @@ export function SavingsPage() {
     } catch (err) {
       console.error("Error al asignar ahorro:", err);
       enqueueSnackbar(
-        err instanceof Error ? err.message : "No se pudo asignar el ahorro.",
+        getErrorMessage(err),
         { variant: "error" },
       );
       setLoadingAvailable(true);
@@ -411,9 +412,7 @@ export function SavingsPage() {
       console.error("Error al devolver ahorro:", error);
 
       enqueueSnackbar(
-        error instanceof Error
-          ? error.message
-          : "No se pudo devolver el ahorro.",
+        getErrorMessage(error),
         { variant: "error" },
       );
     } finally {

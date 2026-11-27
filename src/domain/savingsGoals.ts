@@ -1,4 +1,5 @@
 
+import { UserError } from "./errors";
 import { percentage } from "./money";
 
 export interface SavingsGoal {
@@ -36,7 +37,7 @@ export function calculateGoalProgress(
     goal.savedAmount < 0 ||
     Number.isNaN(goal.deadline.getTime())
   ) {
-    throw new Error("Los datos de la meta no son válidos.");
+    throw new UserError("Los datos de la meta no son válidos.");
   }
 
   const progress =

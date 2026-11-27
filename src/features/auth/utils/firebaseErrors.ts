@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES, getErrorMessage } from "@/shared/errors/errorCatalog";
 import { PASSWORD_TOO_SHORT_MESSAGE } from "../constants/auth.constants";
 import { FirebaseError } from "firebase/app";
 
@@ -20,19 +21,14 @@ export const getAuthErrorMessage = (error: unknown): string => {
         return "Se cerró la ventana de autenticación.";
 
       case "auth/network-request-failed":
-        return "Error de conexión. Verifica tu internet.";
+        return ERROR_MESSAGES.offline;
 
       case "auth/too-many-requests":
         return "Demasiados intentos. Intenta más tarde.";
 
-      case "permission-denied":
-        return "No se pudo acceder a los datos. Verifica las reglas de seguridad de Firestore.";
-
-      case "unavailable":
-        return "Firestore no está disponible. Verifica tu conexión e intenta nuevamente.";
-
       default:
-        return "Error de autenticación";
+        // Errores de Firestore u otros códigos: catálogo único (HU-22)
+        return getErrorMessage(error);
     }
   }
 
@@ -61,5 +57,5 @@ export const getAuthErrorMessage = (error: unknown): string => {
     }
   }
 
-  return "Error inesperado";
+  return getErrorMessage(error);
 };

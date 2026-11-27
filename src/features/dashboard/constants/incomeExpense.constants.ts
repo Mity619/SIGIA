@@ -1,4 +1,5 @@
 import type { TransactionType } from "@/domain";
+import { ERROR_MESSAGES } from "@/shared/errors/errorCatalog";
 import type { LoadErrorKind } from "../types/incomeExpense.types";
 
 /** Rango por defecto: el mes actual y los 5 anteriores. */
@@ -13,15 +14,12 @@ export const DATE_RANGE_ERROR_MESSAGES = {
   tooLong: `El rango no puede superar ${MAX_RANGE_MONTHS} meses.`,
 } as const;
 
+/** Textos tomados del catálogo único de errores (HU-22). */
 export const LOAD_ERROR_MESSAGES: Record<LoadErrorKind, string> = {
-  offline: "No hay conexión. Revisa tu internet e inténtalo de nuevo.",
-  session: "Tu sesión expiró. Inicia sesión de nuevo.",
-  server: "Algo salió mal de nuestro lado. Inténtalo en unos minutos.",
+  offline: ERROR_MESSAGES.offline,
+  session: ERROR_MESSAGES.session,
+  server: ERROR_MESSAGES.server,
 };
-
-/** Códigos de Firestore que indican una sesión inválida o vencida. */
-export const SESSION_ERROR_CODES: readonly string[] = ["unauthenticated", "permission-denied"];
-export const OFFLINE_ERROR_CODES: readonly string[] = ["unavailable"];
 
 export const INCOME_EXPENSE_SERIES: Record<TransactionType, { label: string; color: string }> = {
   expense: { label: "Gastos", color: "var(--chart-1)" },

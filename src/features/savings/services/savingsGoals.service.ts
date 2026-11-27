@@ -1,4 +1,5 @@
 
+import { UserError } from "@/domain/errors";
 import {
   addDoc,
   collection,
@@ -18,7 +19,7 @@ import type {
 // Comprobar que la operación pertenece al usuario autenticado.
 function validateUser(uid: string): void {
   if (!uid || auth.currentUser?.uid !== uid) {
-    throw new Error("Usuario no autenticado.");
+    throw new UserError("Usuario no autenticado.");
   }
 }
 
@@ -37,7 +38,7 @@ export async function createSavingsGoal(
   const name = input.name.trim();
 
   if (!name || name.length > 100) {
-    throw new Error(
+    throw new UserError(
       "El nombre de la meta debe tener entre 1 y 100 caracteres.",
     );
   }
@@ -48,21 +49,21 @@ export async function createSavingsGoal(
     Math.round(input.targetAmount * 100) / 100 !==
       input.targetAmount
   ) {
-    throw new Error("El monto de la meta no es válido.");
+    throw new UserError("El monto de la meta no es válido.");
   }
 
   if (
     !(input.deadline instanceof Date) ||
     Number.isNaN(input.deadline.getTime())
   ) {
-    throw new Error("La fecha límite no es válida.");
+    throw new UserError("La fecha límite no es válida.");
   }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   if (input.deadline.getTime() < today.getTime()) {
-    throw new Error(
+    throw new UserError(
       "La fecha límite no puede ser anterior a hoy.",
     );
   }

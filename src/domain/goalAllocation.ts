@@ -1,3 +1,4 @@
+import { UserError } from "./errors";
 import { fromCents, toCents } from "./money";
 import {
   calculateGoalProgress,
@@ -31,7 +32,7 @@ export function calculateGoalAllocation(
     !validMoney(goal.targetAmount) ||
     goal.targetAmount <= 0
   ) {
-    throw new Error("Los montos no son válidos.");
+    throw new UserError("Los montos no son válidos.");
   }
 
   const amountCents = toCents(amount);
@@ -40,25 +41,25 @@ export function calculateGoalAllocation(
   const targetCents = toCents(goal.targetAmount);
 
   if (amountCents <= 0) {
-    throw new Error("El aporte debe ser mayor a cero.");
+    throw new UserError("El aporte debe ser mayor a cero.");
   }
 
   if (amountCents > availableCents) {
-    throw new Error("No tienes suficiente ahorro disponible.");
+    throw new UserError("No tienes suficiente ahorro disponible.");
   }
 
   if (savedCents >= targetCents) {
-    throw new Error("La meta ya está completada.");
+    throw new UserError("La meta ya está completada.");
   }
 
   if (calculateGoalProgress(goal).status === "failed") {
-    throw new Error(
+    throw new UserError(
       "No puedes asignar ahorros a una meta vencida.",
     );
   }
 
   if (savedCents + amountCents > targetCents) {
-    throw new Error(
+    throw new UserError(
       "El aporte supera el monto restante de la meta.",
     );
   }

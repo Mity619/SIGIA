@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useSnackbar } from "notistack";
+import { getErrorMessage } from "@/shared/errors/errorCatalog";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useAccount } from "@/features/accounts/hooks/useAccount";
@@ -268,10 +269,7 @@ export const Dashboard = () => {
     } catch (err) {
       console.error("Error al guardar checklist:", err);
 
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Ocurrió un error inesperado.";
+      const message = getErrorMessage(err);
 
       enqueueSnackbar(
         `No se pudo guardar la checklist. ${message}`,
