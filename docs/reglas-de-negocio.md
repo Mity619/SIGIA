@@ -14,7 +14,14 @@ Las reglas marcadas con **(S)** son **supuestos**: el documento organizacional (
 | Los conceptos **archivados** no cuentan en ningún total (HU-06) | `items`, `dashboard`, `accounts` |
 | Si un movimiento no tiene `type`, se toma del concepto | `domain/finance.ts` (`resolveEntryType`) |
 
-## 2. Periodos
+## 2. Acceso (HU-01, HU-02)
+
+| Regla | Detalle | Código |
+|---|---|---|
+| Contraseña | 8 o más caracteres. Se valida antes de llamar a Firebase, que solo exige 6 | `features/auth/constants/auth.constants.ts` |
+| Ruta de retorno | Al pedir una página privada sin sesión, se recuerda la ruta (con filtros y ancla) y se vuelve a ella después del login. Solo se aceptan rutas internas; nunca se vuelve a `/login`, `/signup` ni `/` | `app/router/redirect.ts` |
+
+## 3. Periodos
 
 | Periodo | Rango |
 |---|---|
@@ -25,7 +32,7 @@ Las reglas marcadas con **(S)** son **supuestos**: el documento organizacional (
 
 Código: `domain/period.ts` (`checklistPeriodRange`).
 
-## 3. Gastos e ingresos (HU-04 a HU-13)
+## 4. Gastos e ingresos (HU-04 a HU-13)
 
 | Regla | Detalle | Código |
 |---|---|---|
@@ -40,7 +47,7 @@ Código: `domain/period.ts` (`checklistPeriodRange`).
 
 Más detalle en [epica-3-consulta.md](epica-3-consulta.md).
 
-## 4. Cuentas (HU-14, HU-15)
+## 5. Cuentas (HU-14, HU-15)
 
 | Regla | Detalle | Código |
 |---|---|---|
@@ -52,7 +59,7 @@ Más detalle en [epica-3-consulta.md](epica-3-consulta.md).
 | Variación (§5.1) | (saldo actual − saldo anterior) ÷ \|saldo anterior\| × 100. `null` si el saldo anterior es 0. Se divide entre el valor absoluto para que el signo indique si subió o bajó **(S)** | `calculateVariation` |
 | Gráfica de evolución | Necesita al menos **2 movimientos**. Si hay menos, se muestra un mensaje guía | `MIN_MOVEMENTS_FOR_EVOLUTION` |
 
-## 5. Checklist (HU-16, HU-17)
+## 6. Checklist (HU-16, HU-17)
 
 | Regla | Detalle |
 |---|---|
@@ -66,7 +73,7 @@ Más detalle en [epica-3-consulta.md](epica-3-consulta.md).
 
 Código: `features/home-checklist/services/checklist.service.ts`, `domain/checklist.ts`.
 
-## 6. Ahorro (HU-18)
+## 7. Ahorro (HU-18)
 
 | Regla | Detalle | Código |
 |---|---|---|
@@ -75,7 +82,7 @@ Código: `features/home-checklist/services/checklist.service.ts`, `domain/checkl
 | Desglose | Por concepto: monto acumulado y número de veces evitado | `calculateSavings` |
 | Ahorro disponible | Total ahorrado − total asignado a metas (nunca negativo). Si un mismo concepto aparece en periodos que se solapan, se cuenta una sola vez | `domain/availableSavings.ts` |
 
-## 7. Metas (HU-19)
+## 8. Metas (HU-19)
 
 | Regla | Detalle | Código |
 |---|---|---|
@@ -88,7 +95,7 @@ Código: `features/home-checklist/services/checklist.service.ts`, `domain/checkl
 
 > El ahorro asignado a metas es un **valor de control**: no mueve dinero entre cuentas ni cambia saldos.
 
-## 8. Dashboard (HU-20)
+## 9. Dashboard (HU-20)
 
 | Regla | Detalle | Código |
 |---|---|---|

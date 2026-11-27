@@ -2,20 +2,20 @@
 
 Aplicación web de finanzas personales. Cada usuario registra sus gastos e ingresos, los clasifica por frecuencia y grupos, administra cuentas y revisa una checklist periódica. Lo que no marca en la checklist cuenta como **ahorrado**.
 
-> **Estado:** 🚧 Sprint 6 (cierre) · 21 de 23 historias de usuario integradas en `develop` · Última actualización: 26/11/2026
+> **Estado:** 🚧 Sprint 6 (cierre) · 23 de 23 historias de usuario implementadas · Última actualización: 27/11/2026
 
 ## Funcionalidades
 
 | Módulo | Qué permite | HU |
 |---|---|---|
-| Autenticación | Registro, inicio de sesión (correo o Google), cierre de sesión y rutas privadas. Al registrarse se crea la cuenta **Bolsillo** | HU-01 a 03 |
+| Autenticación | Registro (contraseña de 8 o más caracteres), inicio de sesión (correo o Google), cierre de sesión y rutas privadas. Tras el login se vuelve a la página pedida. Al registrarse se crea la cuenta **Bolsillo** | HU-01 a 03 |
 | Gastos e ingresos | Crear, reutilizar (último valor), editar y archivar conceptos y movimientos. Frecuencia obligatoria | HU-04 a 07 |
 | Etiquetas y grupos | Grupos personalizados con íconos verdes, neutros o rojos | HU-08, 09 |
 | Consulta | Cards, filtros combinables (nombre, fecha, etiqueta, valor), detalle con indicadores, historial y gráficas | HU-10 a 13 |
 | Cuentas | Crear cuentas, ver la evolución del saldo y compararlo con ayer, la semana, el mes y el año anteriores | HU-14, 15 |
 | Checklist y ahorro | Checklist diaria, semanal, mensual y anual. Totales de ahorro por periodo y metas con progreso | HU-16 a 19 |
 | Dashboard | Gastos frente a ingresos por mes y en total, con filtro de fechas | HU-20 |
-| Experiencia | Esqueletos de carga en todas las páginas | HU-21 |
+| Experiencia | Esqueletos de carga en todas las páginas, catálogo único de errores en español y colores solo desde el tema | HU-21 a 23 |
 
 Pendientes y limitaciones conocidas: ver [Estado y pendientes](#estado-y-pendientes).
 
@@ -56,6 +56,7 @@ El archivo `.env` está en `.gitignore` y nunca se sube al repositorio.
 | `npm run preview` | Sirve el build localmente |
 | `npm run typecheck` | Solo chequeo de tipos |
 | `npm run lint` | Oxlint |
+| `npm run lint:theme` | Falla si hay colores o fuentes fijas fuera del tema (HU-23) |
 | `npm test` | Pruebas unitarias (Vitest) |
 | `npm run test:coverage` | Pruebas con cobertura de `src/domain` (umbral 90 %) |
 
@@ -76,7 +77,7 @@ src/
 │   └── team/           # página de presentación del equipo
 ├── firebase/       # configuración y hooks genéricos de Firestore
 ├── pages/          # páginas enrutables
-├── shared/         # componentes UI, skeletons, utilidades (fechas, formato)
+├── shared/         # componentes UI, skeletons, catálogo de errores, utilidades
 └── styles/         # tema (tokens de color) y estilos globales
 ```
 
@@ -112,7 +113,8 @@ Más detalle en [docs/arquitectura.md](docs/arquitectura.md).
 
 ## Calidad
 
-- 117 pruebas unitarias. La cobertura de `src/domain` está en ~100 % de líneas (umbral configurado: 90 %).
+- 149 pruebas unitarias. La cobertura de `src/domain` está en ~100 % de líneas (umbral configurado: 90 %).
+- Regla automática de tokens del tema (`npm run lint:theme`).
 - TypeScript estricto. El build falla si hay errores de tipos.
 - **No hay pipeline de CI todavía:** las pruebas y el lint se ejecutan a mano.
 
@@ -132,10 +134,6 @@ Más detalle en [docs/arquitectura.md](docs/arquitectura.md).
 | **Reglas de seguridad de Firestore** (`firestore.rules`) no versionadas ni probadas | Alto: el aislamiento entre usuarios depende de lo publicado en la consola de Firebase |
 | CI (GitHub Actions) y despliegue | El plan los exige (E1 y E11) |
 | Pruebas E2E (Playwright) | El plan pide 8 flujos críticos |
-| HU-22: catálogo único de errores | Los mensajes de §9 solo existen en el dashboard |
-| HU-23: tokens de tema en todas las páginas | Quedan colores escritos a mano en varios componentes |
-| HU-01: contraseña mínima de 8 caracteres | Hoy se acepta el mínimo de Firebase (6) |
-| HU-02: volver a la ruta solicitada tras el login | Hoy siempre redirige a `/dashboard` |
 
 ## Equipo
 

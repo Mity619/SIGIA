@@ -21,7 +21,7 @@ Navegador
 | Features | `src/features/<módulo>/` | Componentes, hooks, esquemas (Zod) y tipos de cada módulo | Dominio, acceso a datos, `shared` |
 | Páginas | `src/pages/`, `features/*/pages/` | Componer features en pantallas enrutables | Features |
 | App | `src/app/` | Router, guardas de ruta y providers globales | Páginas |
-| Compartido | `src/shared/` | Componentes UI (shadcn), skeletons, utilidades de fecha y formato | — |
+| Compartido | `src/shared/` | Componentes UI (shadcn), skeletons, catálogo de errores, utilidades de fecha y formato | Dominio (solo `UserError`) |
 
 Regla principal: **los cálculos de dinero se hacen en `src/domain`**, donde tienen pruebas unitarias. Los componentes solo muestran los resultados.
 
@@ -59,13 +59,45 @@ Regla principal: **los cálculos de dinero se hacen en `src/domain`**, donde tie
 | Filtros en memoria y en la URL | Con el volumen esperado son rápidos, evitan índices compuestos y sobreviven a recargar |
 | Borrado lógico de conceptos (`archived`) | HU-06: no se pierde el historial y no quedan movimientos huérfanos |
 | Recharts cargado de forma diferida | No penaliza la carga inicial |
-| Tokens de color en `styles/index.css` | Tema claro/oscuro único (HU-23) |
+| Tokens de color en `styles/index.css` | Tema claro/oscuro único. Una prueba (`styles/theme-tokens.test.ts`) impide colores o fuentes fijas (HU-23) |
+| Catálogo único de errores (`shared/errors/errorCatalog.ts`) | Ningún error crudo llega a la pantalla (HU-22). Ver abajo |
+
+## Manejo de errores (HU-22)
+
+```text
+servicio / regla de negocio ──throw UserError("mensaje en español")──┐
+Firebase / red ──────────────throw FirebaseError(code) ──────────────┤
+                                                                      ▼
+                       getErrorMessage(error)  (shared/errors/errorCatalog.ts)
+                         · UserError  → su mensaje, tal cual
+                         · otro error → classifyError → texto del catálogo (§9)
+                                                                      ▼
+                                       snackbar / estado de error en pantalla
+```
+
+| Tipo | Códigos | Mensaje |
+|---|---|---|
+| `offline` | `unavailable`, `deadline-exceeded`, `auth/network-request-failed`, navegador sin red | No hay conexión. Revisa tu internet e inténtalo de nuevo. |
+| `session` | `unauthenticated`, `auth/user-token-expired`, `auth/requires-recent-login`… | Tu sesión expiró. Inicia sesión de nuevo. |
+| `permission` | `permission-denied` | No tienes permiso para ver o modificar esta información. |
+| `notFound` | `not-found` | No encontramos lo que buscas. Puede que haya sido eliminado. |
+| `validation` | `invalid-argument`, `out-of-range`, `already-exists` | Revisa los datos ingresados e inténtalo de nuevo. |
+| `server` | Todo lo demás | Algo salió mal de nuestro lado. Inténtalo en unos minutos. |
+
+Reglas:
+- Los servicios lanzan `UserError` **solo** con mensajes escritos para el usuario.
+- La interfaz nunca muestra `error.message` directamente: siempre pasa por `getErrorMessage`.
+- El detalle técnico va a `console.error`, para quien depura.
+- Los errores de validación de formularios (Zod) se muestran junto a cada campo.
 
 ## Pruebas
 
 - `src/domain/**/*.test.ts`: fórmulas, periodos, filtros, ahorro, metas.
 - `src/features/home-checklist/services/checklist.service.test.ts`: reglas de la checklist.
 - `src/shared/utils/*.test.ts`: fechas y formatos.
+- `src/shared/errors/errorCatalog.test.ts`, `features/auth/**.test.ts`: errores, contraseña.
+- `src/app/router/redirect.test.ts`: retorno a la ruta pedida.
+- `src/styles/theme-tokens.test.ts`: regla de colores y fuentes (HU-23).
 
 Se ejecutan con `npm test`. La cobertura de `src/domain` tiene un umbral de 90 % (`vitest.config.ts`).
 
@@ -73,5 +105,4 @@ Se ejecutan con `npm test`. La cobertura de `src/domain` tiene un umbral de 90 %
 
 1. **Security Rules versionadas** (`firestore.rules` + `firebase.json`) con pruebas en el emulador. Hoy algunas validaciones, como no borrar el Bolsillo o que la cuenta sea del usuario, solo se hacen en el cliente.
 2. **CI** que ejecute lint, tipos, pruebas y build en cada PR.
-3. **Manejador de errores único** (HU-22): hoy cada módulo traduce sus errores por separado.
-4. **Bundle principal** de ~416 KB gzip: conviene dividirlo por ruta (`lazy`) para cumplir la meta de LCP < 2,5 s.
+3. **Bundle principal** de ~416 KB gzip: conviene dividirlo por ruta (`lazy`) para cumplir la meta de LCP < 2,5 s.

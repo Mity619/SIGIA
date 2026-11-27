@@ -18,8 +18,8 @@ SIGIA te ayuda a registrar tus gastos e ingresos, ver cuánto pesan en tus finan
 
 ![Página de inicio](img/inicio.jpg)
 
-- **Crear cuenta:** correo, nombre de usuario y contraseña. Al registrarte se crea tu cuenta **Bolsillo**.
-- **Ingresar:** con correo y contraseña, o con **Continuar con Google**.
+- **Crear cuenta:** correo, nombre de usuario y contraseña de **al menos 8 caracteres**. Al registrarte se crea tu cuenta **Bolsillo**.
+- **Ingresar:** con correo y contraseña, o con **Continuar con Google**. Si abriste un enlace a una página privada sin haber iniciado sesión, después de ingresar vuelves a esa página.
 - **¿Quiénes somos?** muestra al equipo que creó SIGIA.
 
 | Iniciar sesión | Registrarse |
@@ -135,6 +135,9 @@ Cada meta muestra una barra de progreso y su estado:
 |---|---|
 | "No hay conexión. Revisa tu internet e inténtalo de nuevo." | Verifica tu conexión y reintenta |
 | "Tu sesión expiró. Inicia sesión de nuevo." | Vuelve a ingresar |
+| "No tienes permiso para ver o modificar esta información." | Verifica que hayas ingresado con tu propia cuenta |
+| "Algo salió mal de nuestro lado. Inténtalo en unos minutos." | Espera un momento y reintenta |
+| "La contraseña debe tener al menos 8 caracteres" | Usa una contraseña más larga |
 | "No puedes guardar la checklist hasta que termine el periodo." | Vuelve cuando el periodo haya terminado |
 | "No tienes suficiente ahorro disponible." | Asigna un monto menor o espera a ahorrar más |
 | "No puedes asignar ahorros a una meta vencida." | Crea una meta nueva con otra fecha |
