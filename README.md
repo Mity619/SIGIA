@@ -1,202 +1,142 @@
-SIGIA · Sistema de Gestión de Ingresos y Ahorros
+# SIGIA · Sistema de Gestión de Ingresos y Ahorros
 
-Proyecto de aplicación web de finanzas personales. La implementación actual incluye autenticación con Firebase y una estructura inicial para el dashboard; las funcionalidades financieras siguen en desarrollo.
+Aplicación web de finanzas personales. Cada usuario registra sus gastos e ingresos, los clasifica por frecuencia y grupos, administra cuentas y revisa una checklist periódica. Lo que no marca en la checklist cuenta como **ahorrado**.
 
-    Estado: 🚧 En desarrollo · Versión: 2.0 · Última actualización: 30/10/2026
+> **Estado:** 🚧 Sprint 6 (cierre) · 21 de 23 historias de usuario integradas en `develop` · Última actualización: 26/11/2026
 
-🎯 Funcionalidades previstas
+## Funcionalidades
 
-    🔐 Autenticación con correo y contraseña, rutas privadas protegidas.
+| Módulo | Qué permite | HU |
+|---|---|---|
+| Autenticación | Registro, inicio de sesión (correo o Google), cierre de sesión y rutas privadas. Al registrarse se crea la cuenta **Bolsillo** | HU-01 a 03 |
+| Gastos e ingresos | Crear, reutilizar (último valor), editar y archivar conceptos y movimientos. Frecuencia obligatoria | HU-04 a 07 |
+| Etiquetas y grupos | Grupos personalizados con íconos verdes, neutros o rojos | HU-08, 09 |
+| Consulta | Cards, filtros combinables (nombre, fecha, etiqueta, valor), detalle con indicadores, historial y gráficas | HU-10 a 13 |
+| Cuentas | Crear cuentas, ver la evolución del saldo y compararlo con ayer, la semana, el mes y el año anteriores | HU-14, 15 |
+| Checklist y ahorro | Checklist diaria, semanal, mensual y anual. Totales de ahorro por periodo y metas con progreso | HU-16 a 19 |
+| Dashboard | Gastos frente a ingresos por mes y en total, con filtro de fechas | HU-20 |
+| Experiencia | Esqueletos de carga en todas las páginas | HU-21 |
 
-    💸 CRUD de gastos e ingresos con fecha, monto, frecuencia y etiquetas.
+Pendientes y limitaciones conocidas: ver [Estado y pendientes](#estado-y-pendientes).
 
-    ⚡ Registro rápido: reutiliza el último valor de un gasto existente (ej. "Café").
-
-    🏷️ Clasificación por frecuencia (eventual, diario, semanal, mensual, anual) y grupos personalizados con íconos.
-
-    📊 Dashboard y visualización de finanzas (en desarrollo; aún sin librería de gráficas).
-
-    🏦 Cuentas (Bolsillo por defecto, banco, ahorros) con historial y variación de saldo.
-
-    ✅ Checklist periódica en el home: lo no marcado se contabiliza como ahorrado.
-
-    🎯 Metas de ahorro con barra de progreso.
-
-    🔍 Filtros por nombre, fecha, etiqueta y valor.
-
-    🌐 Interfaz 100 % en español con skeletons de carga y errores claros.
-
-🛠 Stack actual
+## Stack
 
 | Capa | Tecnología |
 |---|---|
-| Frontend | React 19 · TypeScript 7 · Vite 8 |
+| Frontend | React 19 · TypeScript · Vite |
 | Rutas | React Router 7 |
-| Autenticación y datos | Firebase Authentication · Cloud Firestore |
-| Archivos | Firebase Storage (fotos de perfil) |
-| Interfaz | Tailwind CSS 4 · shadcn/ui · Radix UI |
+| Backend | Firebase Authentication · Cloud Firestore |
+| Formularios | React Hook Form · Zod |
+| Interfaz | Tailwind CSS 4 · shadcn/ui · Radix UI · Remix Icon |
+| Gráficas | Recharts |
 | Notificaciones | notistack |
-| Iconos y tipografía | Remix Icon · Poppins |
-| Utilidades de estilos | clsx · tailwind-merge |
-| Calidad | Oxlint · TypeScript (`tsc --noEmit`) |
+| Pruebas | Vitest (unitarias, con cobertura v8) |
+| Calidad | Oxlint · `tsc --noEmit` |
 
-Las pruebas automatizadas, las gráficas y las librerías de formularios todavía no están configuradas.
+## Empezar
 
-🚀 Empezar
-Requisitos
+**Requisitos:** Node.js 20.19+ o 22.12+, y un proyecto de Firebase con Authentication (correo y Google) y Cloud Firestore habilitados.
 
-    Node.js 20.19+ o 22.12+
-
-    Proyecto de Firebase con Authentication, Cloud Firestore y Cloud Storage habilitados
-
-Instalación
-bash
-
-# 1. Clonar el repositorio
-
-git clone <repo-url>
-cd sigia
-
-# 2. Instalar dependencias
-
+```bash
+git clone https://github.com/Mity619/SIGIA.git
+cd SIGIA
 npm install
+cp .env.template .env   # completar con las credenciales web de Firebase
+npm run dev             # http://localhost:5173
+```
 
-# 3. Crear el archivo local de variables de entorno
-cp .env.template .env
-# Completa VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN,
-# VITE_FIREBASE_PROJECT_ID, VITE_FIREBASE_STORAGE_BUCKET,
-# VITE_FIREBASE_MESSAGING_SENDER_ID y VITE_FIREBASE_APP_ID
+El archivo `.env` está en `.gitignore` y nunca se sube al repositorio.
 
-# 4. Levantar el entorno de desarrollo
+### Scripts
 
-npm run dev
-
-La app estará disponible en http://localhost:5173.
-Scripts disponibles
-bash
-
-npm run dev       # Servidor de desarrollo
-npm run typecheck # Verifica los tipos de TypeScript
-npm run build     # Verifica tipos y genera el build de producción
-npm run lint      # Ejecuta Oxlint
-npm run preview   # Previsualiza el build
-
-📁 Estructura del proyecto
-text
-
-src/
-├── app/          # router y providers de la aplicación
-├── features/
-│   ├── auth/     # autenticación, estado y formularios
-│   └── dashboard/
-├── firebase/     # configuración y hooks de acceso a Firebase
-├── lib/          # utilidades generales (composición de clases CSS)
-├── pages/        # páginas enrutables
-├── shared/       # componentes compartidos y hooks
-└── styles/       # estilos globales y tema Tailwind
-
-Principios de arquitectura
-
-    Feature-based: cada módulo agrupa componentes, hooks y servicios.
-
-    Acceso a Firebase centralizado en firebase/ y en las funciones de cada feature.
-
-    Componentes compartidos en shared/ y páginas conectadas mediante app/router.
-
-
-🗺 Rutas implementadas
-
-| Ruta | Acceso | Descripción |
-|---|---|---|
-| `/` | Pública | Página de inicio |
-| `/signup` | Pública | Registro |
-| `/login` | Pública | Inicio de sesión |
-| `/dashboard` | Privada | Panel principal |
-
-🗄 Modelo de datos previsto
-
-| Colección | Descripción |
+| Comando | Qué hace |
 |---|---|
-| `users/{uid}` | Perfil del usuario |
-| `accounts/{accountId}` | Cuentas financieras (`user_id`, `name`, `default`) |
-| `users/{uid}/items` | Conceptos de gasto e ingreso |
-| `users/{uid}/groups` | Grupos personalizados |
-| `users/{uid}/entries` | Movimientos |
-| `users/{uid}/savings_goals` | Metas de ahorro |
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Chequeo de tipos y build de producción |
+| `npm run preview` | Sirve el build localmente |
+| `npm run typecheck` | Solo chequeo de tipos |
+| `npm run lint` | Oxlint |
+| `npm test` | Pruebas unitarias (Vitest) |
+| `npm run test:coverage` | Pruebas con cobertura de `src/domain` (umbral 90 %) |
 
-Los items pueden guardar los identificadores de sus grupos en un campo `groupIds`, evitando una tabla de unión.
+## Estructura
 
-Reglas clave:
+```text
+src/
+├── app/            # router, rutas privadas/solo invitados y providers
+├── domain/         # lógica financiera pura (sin React ni Firebase) + pruebas
+├── features/
+│   ├── auth/           # registro, login, sesión
+│   ├── accounts/       # cuentas, saldos y comparaciones
+│   ├── items/          # gastos e ingresos: listado, filtros, detalle, formulario
+│   ├── tags/           # grupos e íconos
+│   ├── home-checklist/ # checklist periódica
+│   ├── savings/        # página de ahorro y metas
+│   ├── dashboard/      # gastos frente a ingresos
+│   └── team/           # página de presentación del equipo
+├── firebase/       # configuración y hooks genéricos de Firestore
+├── pages/          # páginas enrutables
+├── shared/         # componentes UI, skeletons, utilidades (fechas, formato)
+└── styles/         # tema (tokens de color) y estilos globales
+```
 
-    Cloud Firestore Security Rules restringen el perfil por uid y las cuentas por user_id.
+Más detalle en [docs/arquitectura.md](docs/arquitectura.md).
 
-    Las reglas y la validación de la aplicación verifican datos como monto > 0 y frecuencias válidas.
+## Rutas
 
-    Configurar índices compuestos de Firestore para las consultas de movimientos (por fecha, item y cuenta) según se necesiten.
+| Ruta | Acceso | Página |
+|---|---|---|
+| `/` | Pública | Inicio |
+| `/signup` | Pública | Registro |
+| `/login` | Solo sin sesión | Inicio de sesión |
+| `/cualquier-cosa` | Pública | Presentación del equipo |
+| `/dashboard` | Privada | Checklist y resumen de gastos frente a ingresos |
+| `/expenses` | Privada | Menú de gastos, ingresos y etiquetas |
+| `/gastos`, `/ingresos` | Privada | Listado con filtros |
+| `/gastos/nuevo`, `/ingresos/nuevo` | Privada | Registrar movimiento |
+| `/gastos/:id`, `/ingresos/:id` | Privada | Detalle e historial |
+| `/etiquetas` | Privada | Grupos personalizados |
+| `/cuentas`, `/cuentas/:accountId` | Privada | Cuentas y detalle de saldo |
+| `/ahorro` | Privada | Ahorro por periodo y metas |
+| `*` | Pública | Página 404 |
 
-    Implementar las agregaciones del dashboard con consultas o agregaciones de Firestore, según los requisitos de lectura y escritura.
+## Documentación
 
-🧮 Fórmulas de negocio
+| Documento | Contenido |
+|---|---|
+| [docs/arquitectura.md](docs/arquitectura.md) | Capas, flujo de datos y decisiones técnicas |
+| [docs/diccionario-datos.md](docs/diccionario-datos.md) | Colecciones de Firestore, campos y relaciones |
+| [docs/reglas-de-negocio.md](docs/reglas-de-negocio.md) | Fórmulas y reglas de cálculo, incluidos los supuestos acordados |
+| [docs/manual-usuario.md](docs/manual-usuario.md) | Guía de uso pantalla por pantalla |
+| [docs/epica-3-consulta.md](docs/epica-3-consulta.md) | Detalle de la Épica 3 (HU-10 a HU-13) |
 
-    % de un gasto = gasto del periodo ÷ ingresos del periodo × 100
+## Calidad
 
-    Gasto anual proyectado = monto × factor (diario 365 · semanal 52 · mensual 12 · anual 1 · eventual = suma real del año)
+- 117 pruebas unitarias. La cobertura de `src/domain` está en ~100 % de líneas (umbral configurado: 90 %).
+- TypeScript estricto. El build falla si hay errores de tipos.
+- **No hay pipeline de CI todavía:** las pruebas y el lint se ejecutan a mano.
 
-    Ahorro por checklist = suma de montos de gastos marcados como "ahorrado"
+**Definition of Done:** PR revisado por al menos una persona, pruebas en verde, sin errores de lint, textos en español y estados de carga, vacío y error implementados.
 
-    Variación de cuenta = (saldo actual − saldo anterior) ÷ saldo anterior × 100
+## Flujo de trabajo
 
-🧪 Calidad
+- `main`: versión estable (pendiente de la primera integración desde `develop`).
+- `develop`: integración.
+- `feature/HU-XX-descripcion`: una rama por historia, con PR hacia `develop`.
+- Commits con [Conventional Commits](https://www.conventionalcommits.org/es/) (`feat:`, `fix:`, `docs:`…).
 
-Actualmente se ejecutan Oxlint y el chequeo de tipos de TypeScript durante el build. Las pruebas unitarias, de componentes, E2E y de reglas de Firebase están pendientes de configuración.
+## Estado y pendientes
 
-Definition of Done: PR revisado, tests en verde, sin errores de lint, textos en español, estados carga/vacío/error implementados y desplegado en previsualización.
-📅 Roadmap
+| Pendiente | Impacto |
+|---|---|
+| **Reglas de seguridad de Firestore** (`firestore.rules`) no versionadas ni probadas | Alto: el aislamiento entre usuarios depende de lo publicado en la consola de Firebase |
+| CI (GitHub Actions) y despliegue | El plan los exige (E1 y E11) |
+| Pruebas E2E (Playwright) | El plan pide 8 flujos críticos |
+| HU-22: catálogo único de errores | Los mensajes de §9 solo existen en el dashboard |
+| HU-23: tokens de tema en todas las páginas | Quedan colores escritos a mano en varios componentes |
+| HU-01: contraseña mínima de 8 caracteres | Hoy se acepta el mínimo de Firebase (6) |
+| HU-02: volver a la ruta solicitada tras el login | Hoy siempre redirige a `/dashboard` |
 
-    ☑
+## Equipo
 
-    Sprint 0 · Preparación (repo, CI, modelo de datos)
-    □
-
-    Sprint 1 · Autenticación, rutas privadas, layout, reglas de seguridad de Firestore
-    □
-
-    Sprint 2 · CRUD de items y movimientos, formulario inteligente
-    □
-
-    Sprint 3 · Listado con filtros, detalle y gráficas del gasto
-    □
-
-    Sprint 4 · Cuentas y evolución de saldo
-    □
-
-    Sprint 5 · Home, checklist y página de ahorro
-    □
-
-    Sprint 6 · Dashboard, pulido, E2E y despliegue final
-
-🤝 Contribuir
-
-    Crea una rama desde develop: git checkout -b feature/HU-XX-descripcion
-
-    Haz commits siguiendo Conventional Commits.
-
-    Abre un Pull Request hacia develop con descripción y capturas.
-
-    Espera revisión (SLA: < 24 h).
-
-Ramas:
-
-    main → producción
-
-    develop → integración
-
-    feature/* → una historia de usuario
-
-    fix/* → correcciones puntuales
-
-📄 Licencia
-
-MIT © 2026 · Equipo SIGIA
-
-<div align="center"> <sub>Hecho con ☕ y React · <a href="#sigia--sistema-de-gestión-de-ingresos-y-ahorros">Volver arriba</a></sub> </div>
+Proyecto académico · 2026. La página `/cualquier-cosa` presenta a los integrantes.
