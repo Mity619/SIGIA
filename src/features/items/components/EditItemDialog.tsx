@@ -23,7 +23,7 @@ const editItemSchema = entrySchema
   .pick({ name: true, frequency: true })
   .extend({ groupIds: entrySchema.shape.groupIds.unwrap() });
 
-const selectClass = 'h-11 w-full rounded-xl border border-gray-200 bg-gray-50/60 px-4 text-sm';
+const selectClass = 'h-11 w-full rounded-xl border border-border bg-muted/50 px-4 text-sm';
 
 interface Props {
   open: boolean;
@@ -74,7 +74,7 @@ export function EditItemDialog({ open, item, groups, saving, onOpenChange, onSub
             <Field>
               <FieldLabel htmlFor="edit-item-name">Nombre</FieldLabel>
               <Input id="edit-item-name" {...register('name')} aria-invalid={!!errors.name} />
-              {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+              {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
             </Field>
 
             <Field>
@@ -84,17 +84,17 @@ export function EditItemDialog({ open, item, groups, saving, onOpenChange, onSub
                   <option key={f.value} value={f.value}>{f.label}</option>
                 ))}
               </select>
-              {errors.frequency && <p className="text-xs text-red-500">{errors.frequency.message}</p>}
+              {errors.frequency && <p className="text-xs text-destructive">{errors.frequency.message}</p>}
             </Field>
 
             <fieldset className="flex min-w-0 flex-col gap-2">
               <legend className="mb-1 text-sm font-medium">Grupos (opcional)</legend>
               {groups.length === 0 ? (
-                <p className="text-xs text-gray-500">No tienes grupos creados aún.</p>
+                <p className="text-xs text-muted-foreground">No tienes grupos creados aún.</p>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
                   {groups.map((g) => (
-                    <label key={g.id} className="flex cursor-pointer items-center gap-2 rounded-lg border p-2 text-sm hover:bg-gray-50">
+                    <label key={g.id} className="flex cursor-pointer items-center gap-2 rounded-lg border p-2 text-sm hover:bg-muted/50">
                       <input
                         type="checkbox"
                         checked={selectedGroups.includes(g.id!)}
@@ -107,7 +107,7 @@ export function EditItemDialog({ open, item, groups, saving, onOpenChange, onSub
                               : selectedGroups.filter((id) => id !== g.id),
                           )
                         }
-                        className="accent-[#DA0081]"
+                        className="accent-primary"
                       />
                       <i className={`${g.iconKey} text-lg`} aria-hidden="true" />
                       {g.name}
@@ -122,7 +122,7 @@ export function EditItemDialog({ open, item, groups, saving, onOpenChange, onSub
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={saving} className="bg-[#DA0081] text-white hover:bg-[#E366A7]">
+            <Button type="submit" disabled={saving} className="bg-primary text-primary-foreground hover:bg-orquidea-70">
               {saving ? 'Guardando…' : 'Guardar cambios'}
             </Button>
           </DialogFooter>

@@ -57,7 +57,7 @@ export function GroupForm({ onSubmit, loading, initialData, onCancel, isNameTake
       <div>
         <label className="text-sm font-medium">Nombre del grupo</label>
         <Input {...register("name")} placeholder="Ej. Mascotas" />
-        {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+        {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
       </div>
       
       <div>
@@ -68,7 +68,7 @@ export function GroupForm({ onSubmit, loading, initialData, onCancel, isNameTake
       <div>
         <label className="text-sm font-medium">Ícono</label>
         <IconPicker tone={tone} value={iconKey} onChange={(key) => setValue("iconKey", key)} />
-        {errors.iconKey && <p className="text-xs text-red-500">El ícono es obligatorio</p>}
+        {errors.iconKey && <p className="text-xs text-destructive">El ícono es obligatorio</p>}
       </div>
 
       <div className="flex gap-2">
@@ -77,7 +77,7 @@ export function GroupForm({ onSubmit, loading, initialData, onCancel, isNameTake
             Cancelar
           </Button>
         )}
-        <Button type="submit" disabled={loading} className="flex-1 bg-[#DA0081] hover:bg-[#E366A7]">
+        <Button type="submit" disabled={loading} className="flex-1 bg-primary hover:bg-orquidea-70">
           {initialData ? "Guardar Cambios" : "Crear Grupo"}
         </Button>
       </div>

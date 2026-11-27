@@ -17,8 +17,8 @@ export function IconPicker({ tone, value, onChange }: Props) {
           onClick={() => onChange(icon.key)}
           className={`flex h-10 w-10 items-center justify-center rounded-lg border transition ${
             value === icon.key
-              ? 'border-[#DA0081] bg-[#DA0081]/10'
-              : 'border-gray-200 hover:bg-gray-50'
+              ? 'border-primary bg-primary/10'
+              : 'border-border hover:bg-muted/50'
           }`}
           title={icon.label}
         >

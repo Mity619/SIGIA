@@ -15,15 +15,15 @@ export const Logo = ({ size = "lg", onlyLogo = false }: LogoProps) => {
   return (
     <span className="flex items-center gap-3">
       <span
-        className={`flex shrink-0 items-center justify-center bg-[#DA0081] shadow-md shadow-[#da008140] ${s.box}`}
+        className={`flex shrink-0 items-center justify-center bg-primary shadow-md shadow-primary/25 ${s.box}`}
       >
         <i
-          className={`ri-money-dollar-circle-fill leading-none text-white ${s.icon}`}
+          className={`ri-money-dollar-circle-fill leading-none text-primary-foreground ${s.icon}`}
           aria-hidden="true"
         />
       </span>
       {!onlyLogo && (
-        <span className={`font-bold tracking-tight text-[#200020] ${s.text}`}>
+        <span className={`font-bold tracking-tight text-foreground ${s.text}`}>
           SIGIA
         </span>
       )}

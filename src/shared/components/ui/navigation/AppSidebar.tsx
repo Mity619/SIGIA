@@ -17,7 +17,7 @@ import { Skeleton } from "../../shadcn/skeleton";
 import { SkeletonText } from "../loading/SkeletonText";
 import { PROFILE_PHOTO_SIZE_CLASS, ProfilePhoto } from "../user/ProfilePhoto";
 
-const userCardClass = "flex items-center gap-3 rounded-2xl bg-gray-50 p-2.5";
+const userCardClass = "flex items-center gap-3 rounded-2xl bg-muted/50 p-2.5";
 
 type IItem = {
   title: string;
@@ -65,16 +65,16 @@ export function AppSidebar() {
   const { pathname } = useLocation();
 
   return (
-    <Sidebar className="border-r border-gray-100 bg-white">
-      <SidebarHeader className="bg-white px-5 pt-6 pb-4 ">
+    <Sidebar className="border-r border-border bg-card">
+      <SidebarHeader className="bg-card px-5 pt-6 pb-4 ">
         <Link to="/" aria-label="Ir al inicio">
           <Logo size="md" onlyLogo={false} />
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="bg-white px-3">
+      <SidebarContent className="bg-card px-3">
         <SidebarGroup>
-          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
             Menú
           </p>
           <SidebarGroupContent>
@@ -89,14 +89,14 @@ export function AppSidebar() {
                       isActive={isActive}
                       className={`h-11 rounded-xl px-3 text-sm transition-all duration-200 ${
                         isActive
-                          ? "bg-[#da00831f] font-semibold text-[#DA0081] hover:bg-[#da00831f] hover:text-[#DA0081]"
-                          : "text-[#200020]/70 hover:bg-gray-50 hover:text-[#200020]"
+                          ? "bg-primary/12 font-semibold text-primary hover:bg-primary/12 hover:text-primary"
+                          : "text-foreground/70 hover:bg-muted/50 hover:text-foreground"
                       }`}
                     >
                       <Link to={item.url}>
                         <i
                           className={`${item.icon} text-lg ${
-                            isActive ? "text-[#DA0081]" : "text-[#200020]/50"
+                            isActive ? "text-primary" : "text-foreground/50"
                           }`}
                           aria-hidden="true"
                         />
@@ -111,7 +111,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="bg-white p-3">
+      <SidebarFooter className="bg-card p-3">
         {loading ? (
           <div className={userCardClass} aria-busy="true">
             <Skeleton className={`${PROFILE_PHOTO_SIZE_CLASS} shrink-0 rounded-full`} />
@@ -121,14 +121,14 @@ export function AppSidebar() {
         ) : (
           <div className={userCardClass}>
             <ProfilePhoto />
-            <span className="min-w-0 flex-1 truncate text-sm font-medium text-[#200020]">
+            <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
               {user?.username?.split(" ").slice(0, 2).join(" ") ?? "Usuario"}
             </span>
             <Button
               onClick={logout}
               aria-label="Cerrar sesión"
               title="Cerrar sesión"
-              className="size-9 shrink-0 rounded-xl bg-[#da00831f] text-[#DA0081] shadow-none transition-colors hover:bg-[#E366A7] hover:text-white"
+              className="size-9 shrink-0 rounded-xl bg-primary/12 text-primary shadow-none transition-colors hover:bg-orquidea-70 hover:text-primary-foreground"
             >
               <i className="ri-logout-box-r-line text-lg" aria-hidden="true" />
             </Button>

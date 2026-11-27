@@ -15,14 +15,14 @@ export const Header = ({ title, paragraph }: HeaderProps) => {
   return (
     <header className={headerClass}>
       <span
-        className="h-1 w-10 rounded-full bg-gradient-to-r from-[#DA0081] to-[#E366A7]"
+        className="h-1 w-10 rounded-full bg-gradient-to-r from-primary to-orquidea-70"
         aria-hidden="true"
       />
-      <h1 className={`${titleTextClass} font-bold tracking-tight text-[#200020]`}>
+      <h1 className={`${titleTextClass} font-bold tracking-tight text-foreground`}>
         {title}
       </h1>
       {paragraph && (
-        <p className={`max-w-md ${paragraphTextClass} text-[#200020]/60`}>
+        <p className={`max-w-md ${paragraphTextClass} text-foreground/60`}>
           {paragraph}
         </p>
       )}

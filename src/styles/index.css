@@ -28,6 +28,8 @@
   --guanabana: #ece7f5;
   --caribe: #5a9efb;
   --naranja: #dc410f;
+  --menta: #138a52;
+  --menta-claro: #4ccb8a;
 }
 
 /* ==========================================================================
@@ -72,6 +74,7 @@
   --accent-foreground: var(--uva);
 
   --destructive: var(--naranja);
+  --success: var(--menta);
 
   --border: color-mix(in oklab, var(--uva) 12%, var(--blanco));
   --input: color-mix(in oklab, var(--uva) 18%, var(--blanco));
@@ -123,6 +126,7 @@
   --accent-foreground: var(--blanco);
 
   --destructive: var(--naranja);
+  --success: var(--menta-claro);
 
   --border: color-mix(in oklab, var(--blanco) 14%, transparent);
   --input: color-mix(in oklab, var(--blanco) 20%, transparent);
@@ -180,6 +184,7 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);

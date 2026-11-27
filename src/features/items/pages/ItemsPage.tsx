@@ -63,12 +63,12 @@ export function ItemsPage({ type }: { type: TransactionType }) {
     <div className="mx-auto max-w-5xl p-6">
       {/* Encabezado responsive (se adapta a móviles) */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold text-[#200020]">{title}</h1>
+        <h1 className="text-3xl font-bold text-foreground">{title}</h1>
         {loading ? (
           <Skeleton className="h-8 w-36 rounded-lg" />
         ) : (
           items.length > 0 && (
-            <Button asChild className="bg-[#DA0081] text-white hover:bg-[#E366A7]">
+            <Button asChild className="bg-primary text-primary-foreground hover:bg-orquidea-70">
               <Link to={`/${route}/nuevo`}>
                 <i className="ri-add-line mr-2 text-lg" />
                 Nuevo {type === "expense" ? "Gasto" : "Ingreso"}
@@ -101,17 +101,17 @@ export function ItemsPage({ type }: { type: TransactionType }) {
         </LoadingRegion>
       ) : items.length === 0 ? (
         /* 🆕 ESTADO VACÍO MEJORADO */
-        <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 bg-gray-50/50 py-24 px-4 text-center">
-          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-sm">
-            <i className={`${icon} text-4xl text-[#DA0081]`} />
+        <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-border bg-muted/50 py-24 px-4 text-center">
+          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-card shadow-sm">
+            <i className={`${icon} text-4xl text-primary`} />
           </div>
-          <h2 className="mb-2 text-xl font-semibold text-[#200020]">
+          <h2 className="mb-2 text-xl font-semibold text-foreground">
             Aún no tienes {title.toLowerCase()}
           </h2>
-          <p className="mb-6 max-w-md text-sm text-gray-500">
+          <p className="mb-6 max-w-md text-sm text-muted-foreground">
             Comienza registrando tu primer movimiento para llevar un control exacto de tus finanzas personales.
           </p>
-          <Button asChild size="lg" className="h-12 rounded-xl bg-[#DA0081] px-8 text-base font-semibold text-white shadow-md shadow-[#da008140] hover:bg-[#E366A7]">
+          <Button asChild size="lg" className="h-12 rounded-xl bg-primary px-8 text-base font-semibold text-primary-foreground shadow-md shadow-primary/25 hover:bg-orquidea-70">
             <Link to={`/${route}/nuevo`}>
               Crear primer {type === "expense" ? "gasto" : "ingreso"}
             </Link>

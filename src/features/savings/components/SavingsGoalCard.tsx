@@ -26,8 +26,8 @@ const GOAL_STATUS_LABELS = {
 
 const GOAL_STATUS_STYLES = {
   pending: "bg-muted text-muted-foreground",
-  completed: "bg-green-100 text-green-800",
-  failed: "bg-red-100 text-red-800",
+  completed: "bg-success/10 text-success",
+  failed: "bg-destructive/10 text-destructive",
 } as const;
 
 const cardClass = "space-y-4 rounded-xl border border-border bg-card p-5 shadow-sm";
@@ -110,7 +110,7 @@ export function SavingsGoalCard({
         aria-valuemax={100}
       >
         <div
-          className="h-full rounded-full bg-green-600 transition-all"
+          className="h-full rounded-full bg-success/90 transition-all"
           style={{
             width: `${progress.percentage}%`,
           }}

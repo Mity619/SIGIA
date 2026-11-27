@@ -21,7 +21,7 @@ import type { EntryChanges } from '../hooks/useUpdateEntry';
 // Mismas reglas y mensajes que al crear (HU-04): no se duplican validaciones.
 const editEntrySchema = entrySchema.pick({ name: true, amount: true, date: true, accountId: true });
 
-const selectClass = 'h-11 w-full rounded-xl border border-gray-200 bg-gray-50/60 px-4 text-sm';
+const selectClass = 'h-11 w-full rounded-xl border border-border bg-muted/50 px-4 text-sm';
 
 interface Props {
   entry: EntryDoc | null;
@@ -68,7 +68,7 @@ export function EditEntryDialog({ entry, accounts, saving, onOpenChange, onSubmi
             <Field>
               <FieldLabel htmlFor="edit-entry-name">Nombre</FieldLabel>
               <Input id="edit-entry-name" {...register('name')} aria-invalid={!!errors.name} />
-              {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+              {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
             </Field>
 
             <Field>
@@ -80,7 +80,7 @@ export function EditEntryDialog({ entry, accounts, saving, onOpenChange, onSubmi
                 {...register('amount', { valueAsNumber: true })}
                 aria-invalid={!!errors.amount}
               />
-              {errors.amount && <p className="text-xs text-red-500">{errors.amount.message}</p>}
+              {errors.amount && <p className="text-xs text-destructive">{errors.amount.message}</p>}
             </Field>
 
             <Field>
@@ -91,7 +91,7 @@ export function EditEntryDialog({ entry, accounts, saving, onOpenChange, onSubmi
                   <option key={acc.id} value={acc.id}>{acc.name}</option>
                 ))}
               </select>
-              {errors.accountId && <p className="text-xs text-red-500">{errors.accountId.message}</p>}
+              {errors.accountId && <p className="text-xs text-destructive">{errors.accountId.message}</p>}
             </Field>
 
             <Field>
@@ -106,7 +106,7 @@ export function EditEntryDialog({ entry, accounts, saving, onOpenChange, onSubmi
                 }
                 aria-invalid={!!errors.date}
               />
-              {errors.date && <p className="text-xs text-red-500">{errors.date.message}</p>}
+              {errors.date && <p className="text-xs text-destructive">{errors.date.message}</p>}
             </Field>
           </FieldGroup>
 
@@ -114,7 +114,7 @@ export function EditEntryDialog({ entry, accounts, saving, onOpenChange, onSubmi
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={saving} className="bg-[#DA0081] text-white hover:bg-[#E366A7]">
+            <Button type="submit" disabled={saving} className="bg-primary text-primary-foreground hover:bg-orquidea-70">
               {saving ? 'Guardando…' : 'Guardar cambios'}
             </Button>
           </DialogFooter>

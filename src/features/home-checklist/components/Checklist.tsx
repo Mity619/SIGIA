@@ -122,7 +122,7 @@ export function Checklist({
                 {item.name}
 
                 {recorded.has(item.id) && (
-                  <span className="mt-1 block text-xs font-normal text-green-600">
+                  <span className="mt-1 block text-xs font-normal text-success">
                     Ya registrado
                   </span>
                 )}

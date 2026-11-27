@@ -53,7 +53,7 @@ export function ConfirmDialog({
               // el componente padre decide cuándo cerrarlo.
             }}
             disabled={isLoading}
-            className={isDestructive ? "bg-red-500 hover:bg-red-600 text-white" : "bg-[#DA0081] hover:bg-[#E366A7] text-white"}
+            className={isDestructive ? "bg-destructive hover:bg-destructive/90 text-primary-foreground" : "bg-primary hover:bg-orquidea-70 text-primary-foreground"}
           >
             {isLoading ? "Procesando..." : confirmText}
           </Button>

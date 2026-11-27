@@ -121,19 +121,19 @@ export function EntryForm({ type, items, accounts, groups, onSubmit, saving }: P
         <Field>
           <FieldLabel>Nombre</FieldLabel>
           <Input {...register('name')} aria-invalid={!!errors.name} />
-          {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+          {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
         </Field>
 
         <Field>
           <FieldLabel>Valor</FieldLabel>
           <Input type="number" step="0.01" {...register('amount', { valueAsNumber: true })} aria-invalid={!!errors.amount} />
-          {errors.amount && <p className="text-xs text-red-500">{errors.amount.message}</p>}
+          {errors.amount && <p className="text-xs text-destructive">{errors.amount.message}</p>}
         </Field>
 
         <Field>
           <FieldLabel>Cuenta destino</FieldLabel>
           <select
-            className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50/60 px-4 text-sm"
+            className="h-11 w-full rounded-xl border border-border bg-muted/50 px-4 text-sm"
             {...register('accountId')}
             aria-invalid={!!errors.accountId}
           >
@@ -144,7 +144,7 @@ export function EntryForm({ type, items, accounts, groups, onSubmit, saving }: P
               </option>
             ))}
           </select>
-          {errors.accountId && <p className="text-xs text-red-500">{errors.accountId.message}</p>}
+          {errors.accountId && <p className="text-xs text-destructive">{errors.accountId.message}</p>}
         </Field>
 
         <Field>
@@ -158,29 +158,29 @@ export function EntryForm({ type, items, accounts, groups, onSubmit, saving }: P
             }
             aria-invalid={!!errors.date}
           />
-          {errors.date && <p className="text-xs text-red-500">{errors.date.message}</p>}
+          {errors.date && <p className="text-xs text-destructive">{errors.date.message}</p>}
         </Field>
 
         <Field>
           <FieldLabel>Frecuencia</FieldLabel>
-          <select className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50/60 px-4 text-sm" {...register('frequency')} aria-invalid={!!errors.frequency}>
+          <select className="h-11 w-full rounded-xl border border-border bg-muted/50 px-4 text-sm" {...register('frequency')} aria-invalid={!!errors.frequency}>
             <option value="">Selecciona una frecuencia</option>
             {FREQUENCY_OPTIONS.map((f) => (
               <option key={f.value} value={f.value}>{f.label}</option>
             ))}
           </select>
-          {errors.frequency && <p className="text-xs text-red-500">{errors.frequency.message}</p>}
+          {errors.frequency && <p className="text-xs text-destructive">{errors.frequency.message}</p>}
         </Field>
 
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Grupos (Opcional)</label>
           {groups.length === 0 ? (
-             <p className="text-xs text-gray-500">No tienes grupos creados aún.</p>
+             <p className="text-xs text-muted-foreground">No tienes grupos creados aún.</p>
           ) : (
             <div className="grid grid-cols-2 gap-2">
               {groups.map((g) => (
-                <label key={g.id} className="flex items-center gap-2 text-sm p-2 border rounded-lg cursor-pointer hover:bg-gray-50">
-                  <input type="checkbox" value={g.id} {...register("groupIds")} className="accent-[#DA0081]" />
+                <label key={g.id} className="flex items-center gap-2 text-sm p-2 border rounded-lg cursor-pointer hover:bg-muted/50">
+                  <input type="checkbox" value={g.id} {...register("groupIds")} className="accent-primary" />
                   <i className={`${g.iconKey} text-lg`} />
                   {g.name}
                 </label>
@@ -189,7 +189,7 @@ export function EntryForm({ type, items, accounts, groups, onSubmit, saving }: P
           )}
         </div>
 
-        <Button type="submit" disabled={saving} className="h-11 w-full rounded-xl bg-[#DA0081] text-white hover:bg-[#E366A7]">
+        <Button type="submit" disabled={saving} className="h-11 w-full rounded-xl bg-primary text-primary-foreground hover:bg-orquidea-70">
           {saving ? 'Guardando…' : 'Guardar movimiento'}
         </Button>
       </FieldGroup>

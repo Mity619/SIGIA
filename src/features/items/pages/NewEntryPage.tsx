@@ -40,8 +40,8 @@ export function NewEntryPage({ type }: { type: TransactionType }) {
 
   return (
     <div className="mx-auto w-full max-w-lg p-6">
-      <div className="rounded-3xl border border-gray-100 bg-white p-8 shadow-sm">
-        <h1 className="mb-6 text-2xl font-bold text-[#200020]">
+      <div className="rounded-3xl border border-border bg-card p-8 shadow-sm">
+        <h1 className="mb-6 text-2xl font-bold text-foreground">
           Nuevo {type === 'expense' ? 'Gasto' : 'Ingreso'}
         </h1>
         

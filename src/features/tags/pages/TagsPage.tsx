@@ -90,7 +90,7 @@ export function TagsPage() {
 
   return (
     <div className="mx-auto max-w-5xl p-6">
-      <h1 className="mb-6 text-2xl font-bold text-[#200020]">Etiquetas y Grupos</h1>
+      <h1 className="mb-6 text-2xl font-bold text-foreground">Etiquetas y Grupos</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Formulario */}
@@ -113,7 +113,7 @@ export function TagsPage() {
           {loading ? <GroupListSkeleton /> : (
             <div className={groupListClass}>
               {groups.map(g => (
-                <div key={g.id} className={`${groupRowClass} bg-white`}>
+                <div key={g.id} className={`${groupRowClass} bg-card`}>
                   <div className={groupNameClass}>
                     <i className={`${g.iconKey} ${groupIconTextClass}`} aria-hidden="true" />
                     <span>{g.name}</span>
@@ -125,7 +125,7 @@ export function TagsPage() {
                       type="button"
                       onClick={() => setGroupToEdit(g)}
                       aria-label={`Editar grupo ${g.name}`}
-                      className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                      className="p-2 text-caribe hover:bg-caribe/10 rounded-lg transition"
                     >
                       <i className="ri-edit-line text-lg" aria-hidden="true" />
                     </button>
@@ -133,7 +133,7 @@ export function TagsPage() {
                       type="button"
                       onClick={() => setGroupToDelete(g)}
                       aria-label={`Eliminar grupo ${g.name}`}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                      className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition"
                     >
                       <i className="ri-delete-bin-line text-lg" aria-hidden="true" />
                     </button>

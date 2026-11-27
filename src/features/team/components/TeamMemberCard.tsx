@@ -14,16 +14,16 @@ const getInitials = (name: string) =>
     .join("");
 
 const socialLinkClass =
-  "flex size-9 items-center justify-center rounded-full bg-[#ece7f5] text-[#200020] transition hover:bg-[#DA0081] hover:text-white";
+  "flex size-9 items-center justify-center rounded-full bg-muted text-foreground transition hover:bg-primary hover:text-primary-foreground";
 
 export const TeamMemberCard = ({ member }: TeamMemberCardProps) => {
   const [photoFailed, setPhotoFailed] = useState(false);
   const showPhoto = member.photo && !photoFailed;
 
   return (
-    <article className="group flex flex-col items-center rounded-2xl border bg-white p-6 text-center shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#da008120]">
+    <article className="group flex flex-col items-center rounded-2xl border bg-card p-6 text-center shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/12">
       {/* Foto con anillo de marca */}
-      <div className="rounded-full bg-gradient-to-br from-[#DA0081] to-[#e992be] p-1 transition duration-300 group-hover:scale-105">
+      <div className="rounded-full bg-gradient-to-br from-primary to-orquidea-50 p-1 transition duration-300 group-hover:scale-105">
         {showPhoto ? (
           <img
             src={member.photo}
@@ -32,12 +32,12 @@ export const TeamMemberCard = ({ member }: TeamMemberCardProps) => {
             height={112}
             loading="lazy"
             style={{ objectPosition: member.photoPosition ?? "50% 50%" }}
-            className="size-28 rounded-full border-4 border-white bg-[#ece7f5] object-cover"
+            className="size-28 rounded-full border-4 border-background bg-muted object-cover"
             onError={() => setPhotoFailed(true)}
           />
         ) : (
           <div
-            className="flex size-28 items-center justify-center rounded-full border-4 border-white bg-[#ece7f5] text-3xl font-bold text-[#DA0081]"
+            className="flex size-28 items-center justify-center rounded-full border-4 border-background bg-muted text-3xl font-bold text-primary"
             aria-hidden="true"
           >
             {getInitials(member.name)}
@@ -45,13 +45,13 @@ export const TeamMemberCard = ({ member }: TeamMemberCardProps) => {
         )}
       </div>
 
-      <h3 className="mt-4 text-lg font-semibold text-[#200020]">
+      <h3 className="mt-4 text-lg font-semibold text-foreground">
         {member.name}
       </h3>
-      <span className="mt-1 rounded-full bg-[#da008114] px-3 py-0.5 text-xs font-medium text-[#DA0081]">
+      <span className="mt-1 rounded-full bg-primary/8 px-3 py-0.5 text-xs font-medium text-primary">
         {member.ig}
       </span>
-      <p className="mt-3 text-sm text-[#200020]/70">{member.bio}</p>
+      <p className="mt-3 text-sm text-foreground/70">{member.bio}</p>
 
       {member.github && (
         <div className="mt-4 flex gap-2">
