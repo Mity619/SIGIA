@@ -1,5 +1,6 @@
 import { useState, type SubmitEvent } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
+import { getRedirectPath } from "@/app/router/redirect";
 import { useSnackbar } from "notistack";
 import { useAuth } from "./useAuth";
 import type { User, UserLogin } from "../types/user.types";
@@ -19,6 +20,7 @@ export const useAuthForm = (isSignup: boolean) => {
 
   //* Hooks
   const navigate = useNavigate();
+  const location = useLocation();
   const { enqueueSnackbar } = useSnackbar();
 
   //* Handlers
@@ -76,7 +78,7 @@ export const useAuthForm = (isSignup: boolean) => {
       enqueueSnackbar(errorMessage, { variant: "error" });
       return;
     }
-    navigate("/dashboard", { replace: true });
+    navigate(getRedirectPath(location.state), { replace: true });
   };
 
   const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
@@ -97,7 +99,7 @@ export const useAuthForm = (isSignup: boolean) => {
       return;
     }
 
-    navigate("/dashboard", { replace: true });
+    navigate(getRedirectPath(location.state), { replace: true });
   };
 
   return {
