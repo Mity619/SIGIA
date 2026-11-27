@@ -1,6 +1,7 @@
 import { useState, type SubmitEvent } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { getRedirectPath } from "@/app/router/redirect";
+import { isPasswordLongEnough, PASSWORD_TOO_SHORT_MESSAGE } from "../constants/auth.constants";
 import { useSnackbar } from "notistack";
 import { useAuth } from "./useAuth";
 import type { User, UserLogin } from "../types/user.types";
@@ -43,6 +44,11 @@ export const useAuthForm = (isSignup: boolean) => {
       username.trim() === "" ||
       password.trim() === ""
     ) {
+      return;
+    }
+
+    if (!isPasswordLongEnough(password)) {
+      enqueueSnackbar(PASSWORD_TOO_SHORT_MESSAGE, { variant: "error" });
       return;
     }
 

@@ -11,6 +11,7 @@ import { LoadingRegion } from "@/shared/components/ui/loading/LoadingRegion";
 import { SkeletonText } from "@/shared/components/ui/loading/SkeletonText";
 import { Link } from "react-router-dom";
 import { useAuthForm } from "../hooks/useAuthForm";
+import { PASSWORD_MIN_LENGTH } from "../constants/auth.constants";
 
 interface Props {
   isSignup?: boolean;
@@ -135,10 +136,16 @@ export const AuthForm = ({ isSignup = false }: Props) => {
                 id="password"
                 placeholder="********"
                 required
+                aria-describedby={isSignup ? "password-hint" : undefined}
                 value={password}
                 onChange={handlePasswordChange}
                 className={inputClass}
               />
+              {isSignup && (
+                <p id="password-hint" className="text-xs text-muted-foreground">
+                  Mínimo {PASSWORD_MIN_LENGTH} caracteres.
+                </p>
+              )}
             </Field>
           </FieldGroup>
         </div>

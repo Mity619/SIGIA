@@ -1,3 +1,4 @@
+import { PASSWORD_TOO_SHORT_MESSAGE } from "../constants/auth.constants";
 import { FirebaseError } from "firebase/app";
 
 export const getAuthErrorMessage = (error: unknown): string => {
@@ -10,7 +11,7 @@ export const getAuthErrorMessage = (error: unknown): string => {
         return "El correo no es válido";
 
       case "auth/weak-password":
-        return "La contraseña debe tener al menos 6 caracteres";
+        return PASSWORD_TOO_SHORT_MESSAGE;
 
       case "auth/invalid-credential":
         return "Correo o contraseña incorrectos. Si te registraste con Google, usa Google para iniciar sesión.";
